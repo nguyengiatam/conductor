@@ -5,6 +5,9 @@
   "author": {
     "name": "Nguyễn Gia Tâm"
   },
+  "homepage": "https://github.com/nguyengiatam/conductor",
+  "repository": "https://github.com/nguyengiatam/conductor",
+  "license": "MIT",
   "keywords": [
     "orchestration",
     "multi-agent",
