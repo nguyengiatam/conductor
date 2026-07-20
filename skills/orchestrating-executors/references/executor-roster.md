@@ -46,6 +46,10 @@ nothing." Confirm quota first.
 - **Model:** `--model "Claude Sonnet 4.6 (Thinking)"` (or current).
 - **Gotcha:** headless `--print` with multi-step tasks is unreliable; prefer
   `-c --prompt=` form. Long inline prompts return empty — hand off via file.
+- **Plugin option:** if the `agy-executor` plugin is installed, dispatch via
+  `/agy-executor:exec <task>` (or the `agy-executor:agy-runner` subagent) instead
+  of hand-typing the flags above — it builds the command correctly and tracks the
+  job. See https://github.com/nguyengiatam/agy-executor.
 
 ## Codex (reviewer-first; heavy-logic executor when needed)
 
