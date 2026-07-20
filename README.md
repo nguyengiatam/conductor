@@ -8,12 +8,32 @@ rather than replacing it.
 
 ## Install
 
+From GitHub (recommended):
+
 ```
-/plugin marketplace add /mnt/c/workspace/conductor
-/plugin install conductor
+/plugin marketplace add https://github.com/nguyengiatam/conductor.git
+/plugin install conductor@conductor-dev
 ```
 
-(Or point the marketplace at this repo's git URL once pushed.)
+`conductor-dev` is the marketplace name (from `.claude-plugin/marketplace.json`);
+the `@<marketplace>` qualifier is **required** on install. `conductor` is the
+plugin name.
+
+The GitHub `owner/repo` shorthand also works, but it clones over SSH by default —
+set `CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1` to clone over HTTPS instead:
+
+```
+/plugin marketplace add nguyengiatam/conductor
+```
+
+From a local clone (no network):
+
+```
+/plugin marketplace add /path/to/conductor
+/plugin install conductor@conductor-dev
+```
+
+Update to the latest pushed version any time with `/plugin marketplace update conductor-dev`.
 
 ## Skills
 
