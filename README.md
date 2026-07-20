@@ -12,10 +12,10 @@ From GitHub (recommended):
 
 ```
 /plugin marketplace add https://github.com/nguyengiatam/conductor.git
-/plugin install conductor@conductor-dev
+/plugin install conductor@conductor-marketplace
 ```
 
-`conductor-dev` is the marketplace name (from `.claude-plugin/marketplace.json`);
+`conductor-marketplace` is the marketplace name (from `.claude-plugin/marketplace.json`);
 the `@<marketplace>` qualifier is **required** on install. `conductor` is the
 plugin name.
 
@@ -30,10 +30,10 @@ From a local clone (no network):
 
 ```
 /plugin marketplace add /path/to/conductor
-/plugin install conductor@conductor-dev
+/plugin install conductor@conductor-marketplace
 ```
 
-Update to the latest pushed version any time with `/plugin marketplace update conductor-dev`.
+Update to the latest pushed version any time with `/plugin marketplace update conductor-marketplace`.
 
 ## Skills
 
