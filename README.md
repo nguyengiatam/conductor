@@ -39,6 +39,7 @@ Update to the latest pushed version any time with `/plugin marketplace update co
 
 | Skill | Purpose |
 |-------|---------|
+| `concept-briefing` | Captures a scale/business-criticality signal before design starts, so depth calibrates to the work. |
 | `using-conductor` | Index/map of the workflow arc and where it meets superpowers. |
 | `orchestrating-executors` | Reviewer/executor split, per-task checkpoint protocol, quota-aware executor selection. |
 | `checkpoint-verification` | Refuses green tests as proof; inspect call-site + drive the real runtime path. |
@@ -48,7 +49,7 @@ Update to the latest pushed version any time with `/plugin marketplace update co
 ## The Arc
 
 ```
-brainstorming (SP) → writing-plans (SP)
+concept-briefing → brainstorming (SP) → writing-plans (SP)
   → orchestrating-executors ⇄ checkpoint-verification ⇄ convention-commit-gate  (per task)
   → adversarial-review-to-go
   → finishing-a-development-branch (SP)

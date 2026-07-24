@@ -14,13 +14,14 @@ between them.
 ## The Arc
 
 ```
-superpowers:brainstorming        → design the change
+conductor:concept-briefing       → lock scale/calibration BEFORE design starts
+superpowers:brainstorming        → design the change (informed by the brief)
 superpowers:writing-plans        → task-by-task plan with real code
 
    ┌─ orchestrating-executors    → pick executor (roster), hand off ONE task
    │     checkpoint-verification  → inspect call-site + drive real runtime path
    │     convention-commit-gate   → enums, no magic literals, commit style
-   └─  (loop per task; fix or re-dispatch if a gate fails)
+   └─  (loop per task; fix or re-dispatch if a gate fails; recalibrate if scope diverges)
 
 adversarial-review-to-go         → external reviewer, converge findings to GO
 superpowers:finishing-a-development-branch → merge / PR / cleanup
@@ -30,6 +31,7 @@ superpowers:finishing-a-development-branch → merge / PR / cleanup
 
 | Situation | Skill |
 |-----------|-------|
+| Calibrating scale/criticality before design | `concept-briefing` |
 | Deciding what to build | `superpowers:brainstorming` |
 | Turning a spec into tasks | `superpowers:writing-plans` |
 | Handing a task to an external agent | `orchestrating-executors` |
@@ -49,5 +51,5 @@ superpowers:finishing-a-development-branch → merge / PR / cleanup
 - The executor roster is machine-specific and lives in one file; the skills are
   portable.
 
-If superpowers is not installed, the four delta skills still work standalone —
+If superpowers is not installed, the five delta skills still work standalone —
 you just lose the brainstorm/plan/finish bookends this map references.
