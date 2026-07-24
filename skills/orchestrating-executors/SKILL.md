@@ -43,6 +43,7 @@ Every executor prompt includes:
 - Current HEAD SHA and the baseline test count/state.
 - The instruction to reconcile against real code/enums before hardcoding anything (executors catch plan errors this way — when one stops to ask, take it seriously).
 - The convention requirements from `convention-commit-gate` for any new code.
+- The calibration line from `concept-briefing`'s `concept-brief.md` (scale + business-criticality + its orchestrating-executors implication), so the executor knows how much rigor this task actually needs. If no `concept-brief.md` exists, infer calibration from the plan's Architecture section or ask the user directly.
 - Repo safety rules (branch, ports/DB isolation if parallel, no killing processes by pattern).
 
 ## The Loop
