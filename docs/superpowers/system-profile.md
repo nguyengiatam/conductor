@@ -1,0 +1,69 @@
+# System Profile: Conductor (Claude Code plugin)
+
+**Cập nhật:** 2026-08-05
+**Trạng thái:** ĐÃ CHỐT — user xác nhận 2026-08-05
+**Ký hiệu:** `~` = Claude suy từ repo, chưa ai xác nhận · `✓` = user đã chốt
+
+## Quy mô & tải
+- **Người dùng:** ✓ **công khai trên GitHub** — người lạ cài được qua marketplace.
+  Hệ quả cứng: mọi ví dụ trong skill phải **tự giải thích**, không được giả định
+  market-report hay bất kỳ project nào của tác giả; lệnh theo máy chỉ nằm trong
+  `executor-roster.md`.
+- Tải: ~ không có runtime. "Tải" duy nhất là **context Claude phải nạp** mỗi lần
+  skill kích hoạt — đó mới là tài nguyên khan hiếm ở đây.
+- Tăng trưởng 12 tháng tới: ~ số skill tăng dần; mỗi skill thêm vào là thêm chi
+  phí nạp cho mọi phiên.
+- **Scale:** ✓ không áp dụng — plugin là file markdown, không có gì để scale.
+
+## Ưu tiên khi tradeoff
+**Xếp hạng, dùng khi hai yêu cầu xung đột (1 = cao nhất):**
+
+1. ✓ **Luật mà bỏ sót sẽ gây hậu quả thật → viết thẳng trong `SKILL.md`.**
+   Không đẩy sang references, không rút gọn cho đẹp.
+2. ✓ **Phần còn lại → đẩy sang `references/`,** đọc khi cần.
+3. Skill ngắn, dễ đọc.
+
+Nói cách khác: độ dài không phải mục tiêu, **hậu quả của việc bỏ sót** mới là
+tiêu chí phân loại. Một luật quan trọng nằm trong file phụ mà Claude không mở là
+luật không tồn tại.
+
+**Không đánh đổi:** ✓ bốn ranh giới cứng, mọi skill phải giữ
+
+1. **Kiểm chứng thật** — test xanh không bao giờ là bằng chứng hoàn thành; phải
+   soi call-site và chạy đường vận hành thật.
+2. **Quyết định thuộc người dùng** — Claude không tự quyết việc bỏ bước, đánh đổi
+   nghiệp vụ, hay thứ tự giao hàng.
+3. **Tự phản biện finding** — mọi finding của reviewer/executor phải kiểm lại trên
+   mã thật trước khi áp dụng; không bao giờ áp mù.
+4. **Không bịa đặt kết quả** — không báo xong khi chưa chạy; không bịa số liệu
+   hay trạng thái chưa đo.
+
+## Định hướng code
+- ~ Không có mã chạy. "Chất lượng" ở đây đo bằng: skill có làm Claude **hành xử
+  đúng** không, và có bị lách bằng lý lẽ không.
+- ~ Mức trừu tượng: viết trực tiếp, mệnh lệnh. Bảng Red Flags ("Thought" vs
+  "Reality") là cách chính để chặn đường lách — giữ khuôn đó.
+- ~ Kiểm chứng skill: dogfood trên việc thật, không có test tự động.
+
+## Ràng buộc vận hành
+- ~ Phân phối qua GitHub marketplace. **Sửa file trong repo làm việc chưa tới tay
+  ai** — phải push, rồi người dùng chạy `/plugin marketplace update`.
+- ~ Bump version trong `plugin.json` **và** `marketplace.json` mỗi lần thêm/đổi
+  skill; hai file phải khớp.
+- ~ Không có CI, không có test tự động. Kiểm bằng dogfood.
+
+## Dữ liệu & tuân thủ
+- ~ Không có dữ liệu người dùng, không PII, không secret trong repo.
+- ~ Rủi ro duy nhất theo hướng này: **rò rỉ chi tiết nội bộ** (đường dẫn, tên
+  service, số liệu MSS) vào skill công khai. Ví dụ phải được viết lại cho trung
+  tính trước khi commit.
+
+## Biên hệ thống
+- **Hợp đồng KHÔNG được phá:**
+  - Tên skill trong frontmatter — người dùng gọi bằng tên, đổi là phá cách gọi.
+  - `references/executor-roster.md` là **chỗ duy nhất** chứa lệnh theo máy; thân
+    skill phải bất khả tri về agent.
+  - Conductor là **delta trên superpowers**, không thay thế: `brainstorming`,
+    `writing-plans`, `finishing-a-development-branch` vẫn là của superpowers.
+- ~ Phụ thuộc ngoài: superpowers (bookend), các CLI executor (Codex, agy, …) chỉ
+  qua roster.
