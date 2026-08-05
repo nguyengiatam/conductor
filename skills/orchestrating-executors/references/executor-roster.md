@@ -6,8 +6,8 @@ with your own executors when moving to a new environment. The
 
 Each executor entry documents: **invoke syntax · quota check · strengths · gotchas.**
 
-> The entries below are the market-report / WSL setup (as of 2026-07). Treat
-> command paths and quirks as examples, not universal truth.
+> The entries below come from one WSL setup (as of 2026-07). Treat command paths
+> and quirks as examples, not universal truth.
 
 ## Priority order (when multiple have quota)
 

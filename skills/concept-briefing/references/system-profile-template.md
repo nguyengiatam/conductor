@@ -68,22 +68,25 @@ rest and have them confirmed in one batch.
 Nothing in the repo tells you the real user count, the growth expectation, or
 which priority wins a conflict. Those are the questions worth the user's time.
 
-## A worked example
+## What a good one reads like
 
-The report-service roadmap in a sibling project states its profile inline, and it
-reads like this — concrete numbers, no hedging:
+Concrete numbers, no hedging — the shape to aim for:
 
 > Service **rất ít người dùng, quy mô nhỏ, gần như không bao giờ scale**. Mọi
 > quyết định thiết kế phải chọn phương án đơn giản hơn khi hai phương án cùng
 > đáp ứng yêu cầu.
 >
-> | Hạng mục | Số thật |
+> | Hạng mục | Số đo được |
 > |---|---|
-> | Tổng document staging | ~380 nghìn, 27 collection |
-> | Thành viên | 31 |
-> | Người dùng hệ thống | rất ít, nội bộ |
-> | Số bản chạy service | **1 replica** |
-> | Kỳ báo cáo dài nhất | **năm** — ca dùng nặng nhất cần tính tới |
+> | Dữ liệu | <số document / bảng, đo ngày nào> |
+> | Người dùng hệ thống | <số thật, nội bộ hay công khai> |
+> | Số bản chạy service | <n replica> |
+> | Ca dùng nặng nhất | <mô tả — thứ phải thiết kế để chịu được> |
 
-Measured numbers beat adjectives. "Nhỏ" is arguable; "1 replica, 31 thành viên"
+**Measured numbers beat adjectives.** "Nhỏ" is arguable and gets re-litigated
+every phase; "1 replica, 200 internal users, heaviest case is the annual report"
 is not, and it settles a dozen architecture arguments before they start.
+
+Write the row for "heaviest realistic case" even when it looks obvious. It is the
+one number that decides whether a design is adequate, and the one most often left
+as a feeling.

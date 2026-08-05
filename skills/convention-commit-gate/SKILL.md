@@ -30,8 +30,9 @@ Follow the project's configured commit convention. Default for this workflow:
 - No `Co-Authored-By` or other footer, unless the project says otherwise.
 
 This is a per-project setting — a company repo with a clean history wants
-one-liners; another repo may want trailers. Read the project's convention
-before committing; the default above is the market-report rule.
+one-liners; another repo may want trailers. **Read the project's own history
+before committing** (`git log --oneline -20`) rather than assuming the default
+above.
 
 ## Red Flags
 

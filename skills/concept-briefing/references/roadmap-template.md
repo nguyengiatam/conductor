@@ -61,49 +61,51 @@ Ai viết plan, ai thực thi, ai kiểm — chỉ ghi khi khác mặc định c
 
 ## A worked example
 
-From a report-service rebuild — nine phases, foundation upward, with the usable
+Rebuilding a scheduled-reporting service — foundation upward, with the usable
 milestone deliberately placed before the end:
 
 ```text
-P0 Khung service
-   └─> P1 Định danh, phân quyền, lưu vết, file
-        └─> P2 Nạp dữ liệu warehouse
-             └─> P3 Danh mục chỉ tiêu + engine tính
-                  └─> P3b Hiệu chỉnh theo requirement mới   ← PHÁT SINH sau P3
-                       ├─> P4 Rollup ngày
-                       └─> P5 Mẫu báo cáo + 4 loại tag
-                       └─> P6 Vòng đời báo cáo + snapshot
-                            └─> P7 Xuất file + ký số        ← MỐC DÙNG ĐƯỢC
-                                 ├─> P8 Lịch + nhắc nhở
-                                 └─> P9 Cổng ngoài + chuyển đổi
+P0 Service skeleton
+   └─> P1 Identity, permissions, audit trail, file storage
+        └─> P2 Data ingestion from the source system
+             └─> P3 Metric catalogue + compute engine
+                  └─> P3b Metric revisions from updated requirements  ← ADDED after P3
+                       ├─> P4 Daily rollup
+                       ├─> P5 Report templates
+                       └─> P6 Report lifecycle + snapshots
+                            └─> P7 Export + signing      ← USABLE MILESTONE
+                                 ├─> P8 Scheduling + reminders
+                                 └─> P9 External gateway + cutover
 ```
 
 Read what that structure gets right:
 
-- **Every phase unlocks the next.** Without P2 there is no data for P3's engine
-  to compute; without P3's catalogue there is nothing for P5's templates to bind.
-- **The usable milestone sits at P7, not P9.** By then users create reports,
-  figures aggregate, files export signed. P8/P9 are automation and integration.
-- **P3b appeared mid-flight** and was inserted at its dependency position, with
-  its origin date recorded — not stuffed into the running phase.
-- **P3 alone ran 11 tasks across 6 executor rounds.** Phases are not
-  session-sized; that phase spanned many sessions and stayed one layer.
+- **Every phase unlocks the next.** Without P2 there is no data for P3's engine to
+  compute; without P3's catalogue there is nothing for P5's templates to bind to.
+- **The usable milestone sits at P7, not P9.** By then people create reports,
+  figures aggregate, files export signed. P8/P9 are automation and integration —
+  valuable, but the system already earns its keep without them.
+- **P3b appeared mid-flight** — updated requirements changed metric definitions
+  P3 had just implemented, and it had to land before P4 aggregated them. It was
+  inserted at its dependency position with its origin date recorded, not stuffed
+  into the running phase.
+- **One phase ran a dozen tasks across several executor rounds.** Phases are not
+  session-sized; that one spanned many sessions and stayed a single layer.
 
-A phase entry from the same document, showing the level of detail that belongs in
-a roadmap (and no more):
+A phase entry at the level of detail that belongs in a roadmap — and no more:
 
-> ### P0 — Khung service
+> ### P0 — Service skeleton
 >
-> **Mục tiêu:** repo mới chạy được, có health check, deploy được lên k3s dev.
+> **Goal:** the new repo runs, has a health check, deploys to the dev cluster.
 >
-> **Phạm vi:** khởi tạo repo; cấu hình TypeScript/ESLint; kết nối Mongo; logger;
-> health endpoint; `src/common` (enum tập trung, mã lỗi, i18n); Dockerfile; Helm
-> chart; script CI.
+> **Scope:** repo init; language/lint config; database connection; logger; health
+> endpoint; shared module (centralized enums, error codes, i18n messages);
+> container image; deployment chart; CI script.
 >
-> **Copy từ hệ cũ:** `src/common`, `src/config`, `src/mongo`, `src/loggers`,
-> `helm/`, `Dockerfile` — sửa tên service, cắt enum không còn dùng.
+> **Reuse:** shared module, config, database, logging, chart and image definitions
+> from the existing service — rename, and drop enums no longer used.
 >
-> **Định nghĩa hoàn thành:** pod chạy trên k3s dev, `/health` trả 200, CI xanh.
+> **Definition of done:** pod running on dev, `/health` returns 200, CI green.
 
 Note what is absent: no file list, no interface sketches, no task breakdown. Those
-belong to P0's detailed plan, written when P0 starts.
+belong in P0's detailed plan, written when P0 starts.
