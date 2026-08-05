@@ -39,6 +39,7 @@ Update to the latest pushed version any time with `/plugin marketplace update co
 
 | Skill | Purpose |
 |-------|---------|
+| `pointer-handoff` | One short pointer file per project: current state + next action. Read on resume, written before the session ends. |
 | `concept-briefing` | Locks a user-confirmed system profile, tiers each request, and routes it to the right amount of process — including a phased roadmap for layered work. |
 | `using-conductor` | Index/map of the workflow arc and where it meets superpowers. |
 | `orchestrating-executors` | Reviewer/executor split, per-task checkpoint protocol, quota-aware executor selection. |
@@ -52,10 +53,11 @@ The arc is **elastic** — `concept-briefing` tiers each request and the tier de
 which steps run. Below is the full T2/T3 path:
 
 ```
-concept-briefing → brainstorming (SP) → writing-plans (SP)
+pointer-handoff (resume) → concept-briefing → brainstorming (SP) → writing-plans (SP)
   → orchestrating-executors ⇄ checkpoint-verification ⇄ convention-commit-gate  (per task)
   → adversarial-review-to-go
   → finishing-a-development-branch (SP)
+  → pointer-handoff (record state + next action)
 ```
 
 | Tier | What runs |
@@ -80,4 +82,4 @@ file for your machine/agents; the skills stay unchanged.
 ## Relationship to superpowers
 
 Conductor is a delta. It assumes superpowers is installed for the
-brainstorm / plan / finish bookends. The four delta skills also work standalone.
+brainstorm / plan / finish bookends. The six delta skills also work standalone.

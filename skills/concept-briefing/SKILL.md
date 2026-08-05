@@ -161,9 +161,9 @@ roadmap answers only: how many phases, what each achieves, what unlocks what.
 tree rather than stuffing it into the running phase; record the date and why.
 
 The roadmap holds **no progress state**. Where we are, what's half-done, what's
-next belongs in a separate session pointer (a `STATUS.md` or equivalent, updated
-each session). Mixing them means the roadmap gets rewritten for progress reasons
-and stable direction blurs into per-session churn.
+next belongs in the pointer — see `pointer-handoff`. Mixing them means the
+roadmap gets rewritten for progress reasons and stable direction blurs into
+per-session churn.
 
 ### The loop
 
@@ -203,8 +203,8 @@ and those take the T1 shortcut; nobody writes a spec for each.
   to all of it.
 - `adversarial-review-to-go` gets the profile so the reviewer can tell real risk
   from noise, and knows which boundaries are hard.
-- Session-to-session continuity (what's half-done, what's next) lives in a
-  separate session pointer, not in anything this skill writes.
+- `pointer-handoff` owns session-to-session continuity — what's half-done, what's
+  next. Nothing this skill writes holds progress state.
 
 ## Red Flags
 

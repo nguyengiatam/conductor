@@ -17,6 +17,7 @@ between them.
 which steps below actually run. What follows is the T2/T3 path — the full one.
 
 ```
+conductor:pointer-handoff        → (ongoing project) read the pointer, reconcile with reality
 conductor:concept-briefing       → confirm system profile, tier the request, route
 superpowers:brainstorming        → design the change (steered by the profile)
 superpowers:writing-plans        → task-by-task plan with real code
@@ -28,7 +29,11 @@ superpowers:writing-plans        → task-by-task plan with real code
 
 adversarial-review-to-go         → external reviewer, converge findings to GO
 superpowers:finishing-a-development-branch → merge / PR / cleanup
+conductor:pointer-handoff        → write state + next action before the session ends
 ```
+
+`pointer-handoff` brackets the whole arc: read at the start, written at the end
+and whenever something significant surfaces mid-session.
 
 Large layered work inserts one step: `concept-briefing` produces a **roadmap** of
 phases from foundation upward, then each phase runs the arc above on its own,
@@ -50,6 +55,7 @@ batched. Verification gates are never skipped when real code gets written.
 
 | Situation | Skill |
 |-----------|-------|
+| Resuming an ongoing project, or closing a session | `pointer-handoff` |
 | Profiling the system + tiering the request before design | `concept-briefing` |
 | Planning large work as phases from foundation upward | `concept-briefing` (roadmap) |
 | Deciding what to build | `superpowers:brainstorming` |
@@ -76,5 +82,5 @@ batched. Verification gates are never skipped when real code gets written.
 - The executor roster is machine-specific and lives in one file; the skills are
   portable.
 
-If superpowers is not installed, the five delta skills still work standalone —
+If superpowers is not installed, the six delta skills still work standalone —
 you just lose the brainstorm/plan/finish bookends this map references.
