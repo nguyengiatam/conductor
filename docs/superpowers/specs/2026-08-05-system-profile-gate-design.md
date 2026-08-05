@@ -10,6 +10,9 @@
    phải quyết định quy trình phía sau chạy những bước nào. Hiện phép đo chỉ sinh
    ra một dòng chữ rồi mọi request vẫn đi qua đúng một đường ống: spec → plan →
    executor, kể cả những việc đơn giản, ít thay đổi.
+3. **Phân tầng kế hoạch cho việc lớn**: dựng roadmap các phần trước, chỉ phân
+   tích chi tiết khi tới lượt từng phần — thay vì cố dựng một spec/plan khổng lồ
+   cho toàn bộ chương trình ngay từ đầu, khi hiểu biết còn ít nhất.
 
 ## Problem
 
@@ -47,7 +50,9 @@ chính phép đo trở thành thủ tục thừa. Một phép đo chỉ có giá
 3. Sửa `concept-briefing` thành skill hai bước (bước 0 đảm bảo hồ sơ, bước 1 đo
    quy mô request **và định tuyến** quy trình phía sau).
 4. Bậc thang bốn mức T0–T3 quyết định bước nào chạy, bước nào bỏ.
-5. Cập nhật các skill hạ nguồn để đọc hồ sơ: `orchestrating-executors`,
+5. Phân tầng kế hoạch: việc chia được từ 3 phần độc lập trở lên thì dựng
+   `roadmap.md` trước, phân tích chi tiết từng phần khi tới lượt.
+6. Cập nhật các skill hạ nguồn để đọc hồ sơ: `orchestrating-executors`,
    `adversarial-review-to-go`; cập nhật `using-conductor` và `README`.
 
 **Out of scope:**
@@ -243,6 +248,92 @@ người dùng.
   không khả thi, chỉ còn một đường). Không hạ bậc vì muốn đi nhanh.
 - Mỗi lần đổi bậc phải nói cho người dùng biết lý do, một dòng.
 
+## Phân tầng kế hoạch: roadmap trước, chi tiết sau
+
+### Vì sao tách khỏi bậc
+
+Bậc T0–T3 đo **mức rủi ro và độ khó của quyết định**. Việc có chia được thành
+nhiều phần giao độc lập hay không là **trục khác**: đổi cách tính một số liệu tiền
+là T3 nhưng chỉ có một phần, không cần roadmap; dựng bốn màn hình quản trị theo
+cùng một khuôn là T2 nhưng rất đáng chia phần.
+
+**Điều kiện kích hoạt:** công việc chia được từ **3 phần nghiệm thu độc lập** trở
+lên. Áp dụng cho cả T2 và T3; T0/T1 theo định nghĩa không bao giờ chạm ngưỡng này.
+
+### Artifact
+
+`docs/superpowers/plans/YYYY-MM-DD-<topic>-roadmap.md`, dùng chung slug với spec
+và plan.
+
+```markdown
+# Roadmap: <topic>
+
+**Chốt với user:** YYYY-MM-DD
+**Nguyên tắc:** chỉ dựng khung ở đây. Phần chưa tới lượt KHÔNG phân tích chi tiết.
+
+## Phần 1 — <tên>
+- Mục tiêu: <1 câu>
+- Phạm vi: <1–2 dòng, đủ để biết cái gì nằm trong, cái gì nằm ngoài>
+- Phụ thuộc: <không / phần nào>
+- Tiêu chí xong: <quan sát được, không phải "code chạy">
+- Bậc dự kiến: <T1/T2/T3 — ước lượng, chốt lại khi tới lượt>
+
+## Phần 2 — ...
+```
+
+### Nguyên tắc cấm phân tích sớm
+
+Ở giai đoạn roadmap, **không** thiết kế API, không chọn phương án, không bóc task
+cho những phần chưa tới lượt. Lý do: làm xong phần 1 sẽ thay đổi hiểu biết về
+phần 3 — phân tích sớm là phân tích sẽ bị vứt, và tệ hơn là phân tích cũ vẫn nằm
+đó trông như còn hiệu lực.
+
+Roadmap chỉ cần đủ chi tiết để trả lời: có bao nhiêu phần, ranh giới ở đâu, làm
+theo thứ tự nào.
+
+### Thứ tự các phần
+
+Ưu tiên theo thứ tự này khi xếp:
+1. Phần gỡ bất định lớn nhất (chưa chắc làm được, hoặc chưa rõ cách làm).
+2. Phần mà các phần khác phụ thuộc vào.
+3. Phần giao được giá trị sớm nhất cho người dùng.
+
+### Vòng lặp thực thi
+
+```
+concept-briefing (bước 0: hồ sơ) → bước 1: đo bậc, phát hiện ≥3 phần
+  → brainstorming ở mức ranh giới (chỉ tới mức chia phần, không đi sâu)
+  → roadmap.md → CHỐT VỚI USER
+  → với mỗi phần, theo thứ tự:
+       đo bậc riêng cho phần đó (có thể chỉ là T1 → bỏ spec/plan)
+       → spec/plan theo bậc của phần
+       → executor → checkpoint-verification → convention-commit-gate
+       → cập nhật roadmap: điều học được, phạm vi/thứ tự phần sau nếu đổi
+  → adversarial-review-to-go (một lần, ở cuối, hoặc sau mỗi phần rủi ro cao)
+  → finishing-a-development-branch
+```
+
+Điểm mấu chốt: **mỗi phần được đo bậc lại độc lập.** Một chương trình lớn hoàn
+toàn có thể gồm phần lớn là các phần T1 — và khi đó chúng đi đường tắt của T1,
+không ai bắt viết spec cho từng phần.
+
+### Chốt roadmap với user
+
+Roadmap phải được người dùng chốt trước khi bắt đầu phần 1, vì nó quyết định thứ
+tự giao hàng — thứ Claude không được tự quyết. Nhẹ hơn gate hồ sơ: chỉ cần xác
+nhận danh sách phần và thứ tự, không rà từng dòng.
+
+Hồ sơ hệ thống phải có trước roadmap: mọi việc có roadmap đều là T2+, nên gate
+cứng đã áp dụng sẵn.
+
+### Quan hệ với `superpowers:brainstorming`
+
+`brainstorming` vốn đã có bước "nếu quá lớn thì tách sub-project". Phần này biến
+bước đó thành artifact có thật và gắn nó vào phép đo, thay vì để nó là một dòng
+khuyến nghị dễ bị bỏ qua. Khi roadmap được kích hoạt, `brainstorming` chạy **hai
+lần ở hai độ sâu**: một lần ở mức ranh giới để chia phần, rồi một lần đầy đủ cho
+từng phần khi tới lượt (nếu bậc của phần đó yêu cầu).
+
 ## Tác động xuống hạ nguồn
 
 - **`superpowers:brainstorming`**: đọc cả hai. Hồ sơ quyết định *chọn phương án
@@ -270,7 +361,7 @@ người dùng.
 
 | File | Thay đổi |
 |---|---|
-| `skills/concept-briefing/SKILL.md` | Viết lại: hai bước, gate cứng theo bậc, template hồ sơ, quy tắc `~`/`✓`, bảng phân bậc T0–T3 + bảng định tuyến, cổng xác nhận trước khi bỏ bước, quy tắc nâng/hạ bậc, cập nhật Red Flags |
+| `skills/concept-briefing/SKILL.md` | Viết lại: hai bước, gate cứng theo bậc, template hồ sơ, quy tắc `~`/`✓`, bảng phân bậc T0–T3 + bảng định tuyến, cổng xác nhận trước khi bỏ bước, quy tắc nâng/hạ bậc, kích hoạt roadmap + template roadmap + nguyên tắc cấm phân tích sớm, cập nhật Red Flags |
 | `skills/orchestrating-executors/SKILL.md` | Thêm bullet vào Handoff Prompt Checklist: trích ưu tiên tradeoff + biên không được phá + mức test từ hồ sơ |
 | `skills/adversarial-review-to-go/SKILL.md` | Reviewer đọc hồ sơ để hiệu chỉnh cái gì đáng coi là finding |
 | `skills/using-conductor/SKILL.md` | Cập nhật arc: arc đầy đủ là đường của T2/T3, kèm bảng định tuyến rút gọn cho T0/T1; cập nhật bảng "When to Use Which Skill" |
@@ -288,6 +379,13 @@ người dùng.
   hướng (T2+), hoặc được gợi ý không chặn ở T1.
 - **Việc T1 nhưng người dùng muốn có spec**: người dùng luôn thắng phép đo. Cổng
   xác nhận tồn tại chính vì thế — Claude đề xuất bậc, người dùng có thể nâng.
+- **Làm phần 1 xong thì phần 3 hết cần thiết**: xoá phần đó khỏi roadmap và nói
+  lý do. Roadmap là kế hoạch sống, không phải cam kết phải làm đủ.
+- **Giữa chừng lộ ra phần mới**: thêm vào roadmap, xếp lại thứ tự theo đúng ba
+  tiêu chí ưu tiên, báo người dùng một dòng.
+- **Tưởng là 3 phần độc lập nhưng thực ra dính chặt nhau**: không dựng roadmap
+  giả. Nếu không cắt được ranh giới sạch thì đó là một phần duy nhất — xử lý như
+  T2/T3 thường, và nói rõ vì sao không chia được.
 - **Nhiều hệ thống trong một repo (monorepo)**: một `system-profile.md` cho mỗi
   đơn vị triển khai độc lập, đặt cạnh đơn vị đó; nếu cả monorepo triển khai chung
   thì một file ở gốc.
@@ -315,3 +413,8 @@ thật:
    nào, nhưng vẫn qua `convention-commit-gate` khi commit.
 7. Dựng tình huống nâng bậc: bắt đầu như T1 rồi lộ ra thay đổi schema → xác nhận
    Claude dừng, nâng lên T2, và lúc đó mới đòi lập `system-profile.md`.
+8. Chạy trên một việc chia được nhiều phần → xác nhận Claude dựng `roadmap.md`
+   chỉ ở mức ranh giới (**không** thiết kế chi tiết phần 2, 3), chốt với người
+   dùng, rồi đo bậc lại cho riêng phần 1.
+9. Sau khi phần 1 xong, xác nhận roadmap được cập nhật với điều học được trước
+   khi bắt đầu phần 2.
