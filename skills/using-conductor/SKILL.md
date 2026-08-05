@@ -13,25 +13,45 @@ between them.
 
 ## The Arc
 
+**The arc is elastic.** `concept-briefing` tiers the request and that tier decides
+which steps below actually run. What follows is the T2/T3 path — the full one.
+
 ```
-conductor:concept-briefing       → lock scale/calibration BEFORE design starts
-superpowers:brainstorming        → design the change (informed by the brief)
+conductor:concept-briefing       → confirm system profile, tier the request, route
+superpowers:brainstorming        → design the change (steered by the profile)
 superpowers:writing-plans        → task-by-task plan with real code
 
    ┌─ orchestrating-executors    → pick executor (roster), hand off ONE task
    │     checkpoint-verification  → inspect call-site + drive real runtime path
    │     convention-commit-gate   → enums, no magic literals, commit style
-   └─  (loop per task; fix or re-dispatch if a gate fails; recalibrate if scope diverges)
+   └─  (loop per task; fix or re-dispatch if a gate fails; re-tier if scope diverges)
 
 adversarial-review-to-go         → external reviewer, converge findings to GO
 superpowers:finishing-a-development-branch → merge / PR / cleanup
 ```
 
+Large layered work inserts one step: `concept-briefing` produces a **roadmap** of
+phases from foundation upward, then each phase runs the arc above on its own,
+with its own tier. Detailed plans are written per phase, never in advance.
+
+### What runs at each tier
+
+| Tier | Path |
+|------|------|
+| **T0** mechanical | Do it yourself → `convention-commit-gate`. Nothing else. |
+| **T1** small, obvious | No spec, no plan file → executor → `checkpoint-verification` → `convention-commit-gate` |
+| **T2** medium | Full arc; `adversarial-review-to-go` only if it touches a risky area |
+| **T3** large / critical | Full arc, nothing skipped |
+
+Skipping a step at T0/T1 requires the user's OK — `concept-briefing` asks once,
+batched. Verification gates are never skipped when real code gets written.
+
 ## When to Use Which Skill
 
 | Situation | Skill |
 |-----------|-------|
-| Calibrating scale/criticality before design | `concept-briefing` |
+| Profiling the system + tiering the request before design | `concept-briefing` |
+| Planning large work as phases from foundation upward | `concept-briefing` (roadmap) |
 | Deciding what to build | `superpowers:brainstorming` |
 | Turning a spec into tasks | `superpowers:writing-plans` |
 | Handing a task to an external agent | `orchestrating-executors` |
@@ -42,6 +62,11 @@ superpowers:finishing-a-development-branch → merge / PR / cleanup
 
 ## Principles That Hold Across All Stages
 
+- Process depth matches the work. Mechanical work gets no spec; critical work
+  gets everything. Measuring size without changing what runs is just ceremony.
+- The system profile is confirmed by the user, not inferred and assumed. Scale,
+  users, and what wins a trade-off decide architecture — a machine guess there
+  propagates into every downstream prompt.
 - Claude does not write business code — it designs, reviews, and verifies.
   (Exception: foundation/concurrency/verification code where precision beats
   delegation.)

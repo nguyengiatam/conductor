@@ -43,7 +43,8 @@ Every executor prompt includes:
 - Current HEAD SHA and the baseline test count/state.
 - The instruction to reconcile against real code/enums before hardcoding anything (executors catch plan errors this way — when one stops to ask, take it seriously).
 - The convention requirements from `convention-commit-gate` for any new code.
-- The calibration line from `concept-briefing`'s `concept-brief.md` (scale + business-criticality + its orchestrating-executors implication), so the executor knows how much rigor this task actually needs. If no `concept-brief.md` exists, infer calibration from the plan's Architecture section or ask the user directly.
+- **From `concept-briefing`'s `system-profile.md`** — the executor is blind to all of this, so quote it rather than referencing it: the trade-off priority order and what must never be traded away, the system boundaries that must not break, and the expected test level. Without these an executor defaults to its own habits and either over-engineers a 200-user internal tool or under-scrutinizes a critical one.
+- The tier from `concept-briefing` (T0–T3 + business-criticality), so the executor knows how much rigor this task actually needs. At T1 there is no `concept-brief.md` — state the tier inline. If no profile exists either (Conductor adopted mid-project), infer from the plan's Architecture section or ask the user directly.
 - Repo safety rules (branch, ports/DB isolation if parallel, no killing processes by pattern).
 
 ## The Loop

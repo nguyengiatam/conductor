@@ -31,6 +31,17 @@ wrong about severity. For each finding:
 4. Surface rejected findings to the user for a decision when they involve a
    real trade-off (e.g. distributed primitive vs in-process guard).
 
+## Calibrate the Reviewer
+
+Include `concept-briefing`'s `system-profile.md` in the review prompt — the
+trade-off priority order, the hard boundaries, the real scale. Without it a
+reviewer applies generic best practice and you get noise in both directions:
+scaling findings on a 200-user internal tool, or a shrug at a boundary that must
+never break. A finding is only real relative to this system's priorities.
+
+The profile does not soften the bar on what it names untouchable. Those are the
+findings to take most seriously.
+
 ## The Round Loop
 
 ```
@@ -62,3 +73,4 @@ until a round yields zero surviving findings  → GO
 | "One round was clean enough" | Converge to zero. The last round is where subtle ones surface. |
 | "Rewrite the whole thing to be safe" | Patch minimally at the contention point. Broad rewrites add risk. |
 | "Rejecting this finding, moving on" | If it's a real trade-off, the user decides — surface it. |
+| "Reviewer wants it hardened for scale" | Check the profile. On a one-replica internal tool that's noise; on the boundary it calls untouchable it's the opposite. |
