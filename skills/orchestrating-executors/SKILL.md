@@ -45,6 +45,7 @@ Every executor prompt includes:
 - The convention requirements from `convention-commit-gate` for any new code.
 - **From `concept-briefing`'s `system-profile.md`** — the executor is blind to all of this, so quote it rather than referencing it: the trade-off priority order and what must never be traded away, the system boundaries that must not break, and the expected test level. Without these an executor defaults to its own habits and either over-engineers a 200-user internal tool or under-scrutinizes a critical one.
 - The tier from `concept-briefing` (T0–T3 + business-criticality), so the executor knows how much rigor this task actually needs. At T1 there is no `concept-brief.md` — state the tier inline. If no profile exists either (Conductor adopted mid-project), infer from the plan's Architecture section or ask the user directly.
+- **Matching lessons from `lessons-ledger`, quoted verbatim** — filter the index by the area this task touches and the kind of work, then paste the rule and its "Áp dụng" line into the prompt. The ledger usually lives in a docs repo the executor cannot open, so a path reference hands it nothing. This is the moment those lessons pay off: the executor is the one about to repeat the mistake.
 - Repo safety rules (branch, ports/DB isolation if parallel, no killing processes by pattern).
 
 ## The Loop
@@ -72,3 +73,4 @@ then:
 | "I'll just assign it, quota is probably fine" | Check quota first. Silent quota failure looks like 'did nothing'. |
 | "This tiny mechanical change — delegate it" | If it's fully specified, you're faster than the round-trip. |
 | "The executor is wrong, override it" | When an executor stops to question the plan, it's often right. Verify against source before dismissing. |
+| "It hit the same trap we hit last phase" | Then the lesson never reached it. Quote lessons into the prompt, and record the ones that are missing. |

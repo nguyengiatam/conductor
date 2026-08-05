@@ -18,6 +18,7 @@ which steps below actually run. What follows is the T2/T3 path — the full one.
 
 ```
 conductor:pointer-handoff        → (ongoing project) read the pointer, reconcile with reality
+conductor:lessons-ledger         → pull only the lessons matching this area + kind of work
 conductor:concept-briefing       → confirm system profile, tier the request, route
 superpowers:brainstorming        → design the change (steered by the profile)
 superpowers:writing-plans        → task-by-task plan with real code
@@ -33,7 +34,10 @@ conductor:pointer-handoff        → write state + next action before the sessio
 ```
 
 `pointer-handoff` brackets the whole arc: read at the start, written at the end
-and whenever something significant surfaces mid-session.
+and whenever something significant surfaces mid-session. `lessons-ledger` is
+consulted before working in an area (and quoted into executor prompts), and
+written the moment a diagnosis proves wrong or verification catches what the
+tests missed.
 
 Large layered work inserts one step: `concept-briefing` produces a **roadmap** of
 phases from foundation upward, then each phase runs the arc above on its own,
@@ -56,6 +60,7 @@ batched. Verification gates are never skipped when real code gets written.
 | Situation | Skill |
 |-----------|-------|
 | Resuming an ongoing project, or closing a session | `pointer-handoff` |
+| Starting work in an area, or recording a wrong diagnosis | `lessons-ledger` |
 | Profiling the system + tiering the request before design | `concept-briefing` |
 | Planning large work as phases from foundation upward | `concept-briefing` (roadmap) |
 | Deciding what to build | `superpowers:brainstorming` |
@@ -82,5 +87,5 @@ batched. Verification gates are never skipped when real code gets written.
 - The executor roster is machine-specific and lives in one file; the skills are
   portable.
 
-If superpowers is not installed, the six delta skills still work standalone —
+If superpowers is not installed, the seven delta skills still work standalone —
 you just lose the brainstorm/plan/finish bookends this map references.

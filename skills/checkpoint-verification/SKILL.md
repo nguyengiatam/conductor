@@ -46,6 +46,12 @@ for delegated work: the call-site and the real operational path.
 - "435/0" or "650/0" green has hidden both dead error codes and unreached
   recovery paths on this project.
 
+## When Verification Catches What Tests Missed
+
+Green tests plus a real defect means the suite is blind to a whole class of bug —
+that is a lesson, not just a fix. Record it in `lessons-ledger` immediately, with
+the evidence that exposed it. The same blindness will be there next phase.
+
 ## Red Flags
 
 | Thought | Reality |
