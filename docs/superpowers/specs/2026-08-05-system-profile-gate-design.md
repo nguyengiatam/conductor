@@ -1,11 +1,15 @@
 # System Profile Gate (concept-briefing v2) — Design
 
-**Goal:** Sửa lại phase lấy concept của Conductor. Hiện `concept-briefing` chỉ đo
-**quy mô của yêu cầu** (task này to hay nhỏ). Thiếu hẳn thứ quan trọng hơn:
-**hồ sơ của hệ thống** — hệ thống lớn hay nhỏ, bao nhiêu người dùng, có cần scale
-không, khi hai yêu cầu xung đột thì ưu tiên cái nào. Đây mới là thứ quyết định
-lựa chọn phương án code, và nó phải được **chốt với người dùng**, không phải suy
-đoán từ repo.
+**Goal:** Sửa lại phase lấy concept của Conductor, hai việc:
+
+1. Bổ sung **hồ sơ hệ thống** — hệ thống lớn hay nhỏ, bao nhiêu người dùng, có
+   cần scale không, khi hai yêu cầu xung đột thì ưu tiên cái nào. Đây là thứ
+   quyết định lựa chọn phương án code, và nó phải được **chốt với người dùng**,
+   không phải suy đoán từ repo. Hiện `concept-briefing` không có gì tương đương.
+2. Biến kết quả đo quy mô request thành **quyết định định tuyến** — bậc đo được
+   phải quyết định quy trình phía sau chạy những bước nào. Hiện phép đo chỉ sinh
+   ra một dòng chữ rồi mọi request vẫn đi qua đúng một đường ống: spec → plan →
+   executor, kể cả những việc đơn giản, ít thay đổi.
 
 ## Problem
 
@@ -26,6 +30,13 @@ không nói gì về **hệ thống đang được sửa**. Hệ quả:
 - Cùng một thông tin bối cảnh bị hỏi lại (hoặc tệ hơn: bị đoán lại, khác đi) ở
   mỗi request mới, vì không có chỗ nào lưu.
 
+Vấn đề thứ hai, độc lập với hồ sơ: **phép đo hiện tại không dẫn tới hành động
+nào.** `concept-brief.md` ghi "quy mô: nhỏ" rồi arc vẫn chạy nguyên vẹn — vẫn
+dựng spec, vẫn dựng file plan, vẫn qua vòng executor đầy đủ. Kết quả là những
+việc rất đơn giản, ít thay đổi vẫn phải trả toàn bộ chi phí nghi thức, khiến
+chính phép đo trở thành thủ tục thừa. Một phép đo chỉ có giá trị nếu nó thay đổi
+được cái gì đó phía sau.
+
 ## Scope
 
 **In scope:**
@@ -33,9 +44,10 @@ không nói gì về **hệ thống đang được sửa**. Hệ quả:
    `docs/superpowers/system-profile.md`.
 2. Cơ chế lập hồ sơ: Claude suy nháp từ repo → **người dùng chốt** → mới được đi
    tiếp. Đây là **gate cứng**.
-3. Sửa `concept-briefing` thành skill hai bước (bước 0 đảm bảo hồ sơ, bước 1 giữ
-   calibration quy mô request như cũ nhưng rút gọn).
-4. Cập nhật các skill hạ nguồn để đọc hồ sơ: `orchestrating-executors`,
+3. Sửa `concept-briefing` thành skill hai bước (bước 0 đảm bảo hồ sơ, bước 1 đo
+   quy mô request **và định tuyến** quy trình phía sau).
+4. Bậc thang bốn mức T0–T3 quyết định bước nào chạy, bước nào bỏ.
+5. Cập nhật các skill hạ nguồn để đọc hồ sơ: `orchestrating-executors`,
    `adversarial-review-to-go`; cập nhật `using-conductor` và `README`.
 
 **Out of scope:**
@@ -51,9 +63,9 @@ không nói gì về **hệ thống đang được sửa**. Hệ quả:
 |---|---|---|
 | Phạm vi | Cả project | Một request |
 | Vòng đời | Nhiều tháng, sửa khi hệ thống đổi | Một lần dùng rồi thôi |
-| Trả lời câu hỏi | "Hệ thống này là loại gì, ưu tiên gì?" | "Việc này to tới đâu?" |
-| Nguồn sự thật | **Người dùng chốt** | Claude tự ước lượng |
-| Vị trí | `docs/superpowers/system-profile.md` (không gắn ngày) | `docs/superpowers/plans/YYYY-MM-DD-<topic>-concept-brief.md` |
+| Trả lời câu hỏi | "Hệ thống này là loại gì, ưu tiên gì?" | "Việc này to tới đâu → chạy những bước nào?" |
+| Nguồn sự thật | **Người dùng chốt** | Claude ước lượng, người dùng xác nhận khi có bước bị bỏ |
+| Vị trí | `docs/superpowers/system-profile.md` (không gắn ngày) | `docs/superpowers/plans/YYYY-MM-DD-<topic>-concept-brief.md`, **chỉ sinh từ T2 trở lên** |
 
 Lý do tách: hai thứ có vòng đời khác hẳn nhau. Gộp chung sẽ khiến bối cảnh hệ
 thống bị chép lại ở mỗi request và trôi lệch dần giữa các bản.
@@ -111,10 +123,15 @@ hai ký hiệu.
 
 Đây là điểm trung tâm của thiết kế, không phải chi tiết phụ.
 
-- `concept-briefing` **không được kết thúc** khi `system-profile.md` còn ở trạng
-  thái `CHƯA CHỐT`.
+Gate áp dụng **từ bậc T2 trở lên** (xem "Phân bậc và định tuyến"). Với T0 gate
+không áp dụng, với T1 chỉ gợi ý — vì hồ sơ tồn tại để định hướng *lựa chọn phương
+án*, mà T0/T1 theo định nghĩa không có lựa chọn nào để định hướng. Ép lập hồ sơ ở
+đó chính là kiểu cứng nhắc thiết kế này muốn bỏ.
+
+- `concept-briefing` **không được kết thúc** khi công việc từ T2 trở lên mà
+  `system-profile.md` còn ở trạng thái `CHƯA CHỐT`.
 - `superpowers:brainstorming` **không được bắt đầu chọn phương án** khi hồ sơ
-  chưa chốt. Khác hẳn fallback mềm mà `orchestrating-executors` đang dùng cho
+  chưa chốt (chỉ áp dụng khi brainstorming thật sự chạy, tức T2+). Khác hẳn fallback mềm mà `orchestrating-executors` đang dùng cho
   `concept-brief.md` — ở đây là chặn cứng, vì lựa chọn phương án code phụ thuộc
   nặng vào hồ sơ.
 - **Bốn dòng bắt buộc người dùng trả lời trực tiếp**, Claude tuyệt đối không được
@@ -154,13 +171,77 @@ hai ký hiệu.
 Nguyên tắc: hỏi theo lô, không hỏi sáu vòng. Chi phí của bước này là một lần cho
 cả project, nên chấp nhận được — nhưng vẫn phải gọn.
 
-### Bước 1 — Calibration quy mô request
+### Bước 1 — Đo quy mô request và định tuyến
 
-Giữ cơ chế hiện tại của `concept-brief.md` (1–3 câu hỏi nhẹ, hoặc không hỏi gì
-với request hiển nhiên nhỏ; xác nhận bằng một dòng, không phải gate spec-review).
-Rút gọn: brief **không lặp lại** bối cảnh hệ thống nữa, chỉ tham chiếu tới
-`system-profile.md`. Ba dòng còn lại: quy mô ước lượng, mức độ nghiệp vụ, kỳ vọng
-người yêu cầu — cộng phần hàm ý hiệu chỉnh như cũ.
+Giữ cơ chế hỏi hiện tại (1–3 câu hỏi nhẹ, hoặc không hỏi gì với request hiển
+nhiên nhỏ), nhưng đầu ra không còn là một dòng mô tả — đầu ra là **một bậc T0–T3
+quyết định các bước tiếp theo**. Nội dung bối cảnh hệ thống không lặp lại ở đây,
+chỉ tham chiếu tới `system-profile.md`.
+
+Xem section "Phân bậc và định tuyến quy trình" bên dưới.
+
+## Phân bậc và định tuyến quy trình
+
+### Tiêu chí phân bậc
+
+Phân bậc theo **số quyết định phải ra**, cố ý **không đếm số dòng code**. Sửa 300
+dòng lặp lại một khuôn vẫn là T1; sửa 10 dòng đổi cách tính một số liệu đã chốt
+là T3.
+
+| Bậc | Dấu hiệu nhận biết |
+|---|---|
+| **T0 — cơ học** | Không có lựa chọn phương án nào: typo, đổi hằng số, rename, bump version, sửa comment |
+| **T1 — nhỏ, rõ** | Đúng một cách làm hiển nhiên; 1–3 file; không chạm biên hệ thống, không chạm schema/dữ liệu |
+| **T2 — vừa** | Có từ 2 phương án đáng cân nhắc trở lên, hoặc chạm schema/API, hoặc thêm thành phần mới |
+| **T3 — lớn / business-critical** | Chạm dữ liệu tiền hoặc số liệu đã chốt, phá biên hệ thống, hoặc trải trên nhiều subsystem |
+
+### Bậc quyết định chạy gì
+
+| Bậc | system-profile | spec | file plan | executor | checkpoint-verification | convention-commit-gate | adversarial-review-to-go |
+|---|---|---|---|---|---|---|---|
+| T0 | miễn | không | không | không (Claude làm thẳng) | không | **có** | không |
+| T1 | gợi ý, không chặn | không | không (checklist vài dòng trong hội thoại) | có | **có** | **có** | không |
+| T2 | **gate cứng** | có, ngắn | có | có | **có** | **có** | chỉ khi chạm vùng rủi ro |
+| T3 | **gate cứng** | có | có | có | **có** | **có** | **có** |
+
+`convention-commit-gate` và `checkpoint-verification` không bao giờ bị bỏ khi có
+code thật được viết — bỏ chúng là bỏ phần kiểm chứng, khác hẳn với bỏ phần giấy
+tờ. T0 miễn `checkpoint-verification` vì Claude tự viết và tự thấy thay đổi, không
+có bàn giao nào để kiểm.
+
+### Cổng xác nhận trước khi bỏ bước
+
+Claude **không tự ý bỏ bước**. Khi phép đo ra T0 hoặc T1, Claude dừng và hỏi
+**đúng một lần, gộp mọi thứ vào một message**, ví dụ:
+
+> "Việc này tôi xếp T1 (chỉ đổi cách format ngày ở 2 file, không có phương án
+> nào khác) → đề xuất bỏ spec và file plan, làm thẳng qua executor rồi
+> checkpoint. Project chưa có system-profile — T1 không bắt buộc, lập luôn hay để
+> sau? Ok thì tôi chạy."
+
+Gộp cả câu hỏi bậc lẫn câu hỏi hồ sơ vào một lượt, để việc nhỏ không bị chẻ thành
+nhiều vòng chờ — đúng thứ đang cần tránh.
+
+Với T2/T3 (chạy đủ bước) thì không cần hỏi: mặc định an toàn không tốn gì của
+người dùng.
+
+### Sinh artifact theo bậc
+
+- **T0:** không sinh file nào. Bậc được nói trong hội thoại rồi thôi.
+- **T1:** không sinh `concept-brief.md`. Bậc + checklist nằm trong hội thoại. Ghi
+  một file brief cho việc T1 chính là loại nghi thức thiết kế này muốn bỏ.
+- **T2/T3:** sinh `concept-brief.md` như hiện tại, cộng thêm dòng bậc và các bước
+  đã quyết định chạy.
+
+### Nâng và hạ bậc giữa chừng
+
+- **Nâng bậc:** đang làm T1 mà phát hiện có lựa chọn phương án thật, hoặc chạm
+  schema/biên hệ thống → **dừng ngay**, nâng bậc, chạy các bước mà bậc mới yêu
+  cầu — kể cả lập `system-profile.md` nếu nâng lên T2 mà chưa có. Không được
+  "đằng nào cũng làm gần xong rồi" mà đi tiếp.
+- **Hạ bậc:** chỉ khi có bằng chứng cụ thể (ví dụ: đọc code thấy phương án thứ hai
+  không khả thi, chỉ còn một đường). Không hạ bậc vì muốn đi nhanh.
+- Mỗi lần đổi bậc phải nói cho người dùng biết lý do, một dòng.
 
 ## Tác động xuống hạ nguồn
 
@@ -189,11 +270,11 @@ người yêu cầu — cộng phần hàm ý hiệu chỉnh như cũ.
 
 | File | Thay đổi |
 |---|---|
-| `skills/concept-briefing/SKILL.md` | Viết lại: hai bước, gate cứng, template hồ sơ, quy tắc `~`/`✓`, cập nhật Red Flags |
+| `skills/concept-briefing/SKILL.md` | Viết lại: hai bước, gate cứng theo bậc, template hồ sơ, quy tắc `~`/`✓`, bảng phân bậc T0–T3 + bảng định tuyến, cổng xác nhận trước khi bỏ bước, quy tắc nâng/hạ bậc, cập nhật Red Flags |
 | `skills/orchestrating-executors/SKILL.md` | Thêm bullet vào Handoff Prompt Checklist: trích ưu tiên tradeoff + biên không được phá + mức test từ hồ sơ |
 | `skills/adversarial-review-to-go/SKILL.md` | Reviewer đọc hồ sơ để hiệu chỉnh cái gì đáng coi là finding |
-| `skills/using-conductor/SKILL.md` | Cập nhật arc + bảng "When to Use Which Skill" |
-| `README.md` | Cập nhật mô tả `concept-briefing` + arc |
+| `skills/using-conductor/SKILL.md` | Cập nhật arc: arc đầy đủ là đường của T2/T3, kèm bảng định tuyến rút gọn cho T0/T1; cập nhật bảng "When to Use Which Skill" |
+| `README.md` | Cập nhật mô tả `concept-briefing` + arc, nêu rõ arc co giãn theo bậc |
 | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` | Bump `0.2.0` → `0.3.0` |
 
 ## Edge cases
@@ -202,9 +283,11 @@ người yêu cầu — cộng phần hàm ý hiệu chỉnh như cũ.
   phần lớn dòng để trống và hỏi. Chấp nhận — thà hỏi còn hơn đoán bừa.
 - **Conductor áp dụng giữa chừng, chưa từng có hồ sơ**: gate vẫn cứng — lập hồ sơ
   trước khi brainstorming. Đây là lần duy nhất phải trả chi phí này.
-- **Request cực nhỏ (sửa typo) trên project chưa có hồ sơ**: vẫn phải lập hồ sơ.
-  Đây là đánh đổi có chủ đích của thiết kế — hồ sơ là tài sản của project, không
-  phải chi phí của request; lập một lần rồi mọi request sau đều hưởng.
+- **Request cực nhỏ (sửa typo) trên project chưa có hồ sơ**: T0 miễn hồ sơ, làm
+  thẳng. Hồ sơ chỉ bị đòi khi công việc thật sự có quyết định kiến trúc để định
+  hướng (T2+), hoặc được gợi ý không chặn ở T1.
+- **Việc T1 nhưng người dùng muốn có spec**: người dùng luôn thắng phép đo. Cổng
+  xác nhận tồn tại chính vì thế — Claude đề xuất bậc, người dùng có thể nâng.
 - **Nhiều hệ thống trong một repo (monorepo)**: một `system-profile.md` cho mỗi
   đơn vị triển khai độc lập, đặt cạnh đơn vị đó; nếu cả monorepo triển khai chung
   thì một file ở gốc.
@@ -224,3 +307,11 @@ thật:
    chứa thứ tự ưu tiên tradeoff và biên không được phá.
 4. Xác nhận bốn skill còn lại không đổi hành vi ngoài các mục đã liệt kê ở bảng
    trên.
+5. Chạy trên một việc T1 thật (ví dụ đổi format hiển thị ở vài file) → xác nhận
+   Claude đề xuất bỏ spec/plan, hỏi **một lần duy nhất** gộp cả bậc lẫn hồ sơ, và
+   sau khi được đồng ý thì đi thẳng tới executor mà không sinh file spec/plan/brief
+   nào.
+6. Chạy trên một việc T0 (sửa typo) → xác nhận không đòi hồ sơ, không sinh file
+   nào, nhưng vẫn qua `convention-commit-gate` khi commit.
+7. Dựng tình huống nâng bậc: bắt đầu như T1 rồi lộ ra thay đổi schema → xác nhận
+   Claude dừng, nâng lên T2, và lúc đó mới đòi lập `system-profile.md`.
