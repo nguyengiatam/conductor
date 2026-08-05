@@ -1,6 +1,6 @@
 ---
 name: orchestrating-executors
-description: Use when a plan is ready and implementation will be delegated to external coding agents or subagents — covers role separation, quota-aware executor selection, one-task handoffs, mandatory monitoring of every dispatch, parallel-run isolation, and the per-task checkpoint protocol.
+description: Use when a plan is ready and implementation will be delegated to external coding agents or subagents — covers knowing your workforce and what each has proven, choosing between a subagent and an external agent (confirming with the user the first time), role separation, quota management, one-task handoffs, mandatory monitoring of every dispatch, parallel-run isolation, and the per-task checkpoint protocol.
 ---
 
 # Orchestrating External Executors
@@ -52,8 +52,80 @@ Then match work to agent:
 | Mechanical: scaffolding, copying modules, CRUD, enum plumbing | The cheapest agent with quota — or yourself if it's fully specified |
 | Review of concurrency, migration, crash-gap | The review-strong agent, and never the one that wrote the code |
 
+Check the project's team file first (see below) — it records who has been assigned
+what here, and what each has actually proven.
+
 Reserve quota on at least one agent as a fallback and second opinion. Running
 every agent to zero leaves you unable to review what the last one produced.
+
+## Knowing Your Workforce
+
+Coordinating is a management job: you are expected to know who is available, what
+each one is for, and what each has actually proven. Two distinct sources of labor:
+
+| | **Subagent** (inside your own harness) | **External agent** (its own CLI) |
+|---|---|---|
+| Quota | Spends the **current session's** budget | Its own, independent budget |
+| Start-up | Warm — inherits framing you provide cheaply | Cold — knows nothing, needs the context file |
+| Observability | Tracked by your harness | Needs its own monitor; can die silently |
+| Independence | Same model family, correlated blind spots | Genuinely different eyes |
+| Best for | Work needing deep context; when external agents are out of quota | Preserving session budget; independent review |
+
+**Which source to use is the user's call, not yours.** The two spend different
+budgets — one burns the session the user is paying for right now, the other burns
+a CLI quota that may be reserved for something else. Picking silently spends
+resources on their behalf.
+
+### First time a project needs a subagent — confirm
+
+If the project has **no history of using subagents** (no team file, or no subagent
+entry in it) and the work calls for one, **stop and ask** before dispatching:
+
+- Subagent inside this session, or an external agent?
+- If a subagent: which kind/model?
+- What role — writing code, reviewing, or investigating?
+
+Then **record the answer in the team file** so this is asked once, not every time.
+When the team file already answers it, follow it silently; only come back to the
+user when the situation falls outside what's recorded (a new role, or the recorded
+choice is out of quota).
+
+### The team file
+
+`docs/superpowers/team.md` in the project — assignments belong to the project
+(this project writes code with one model, the next may not), while
+[the roster](references/executor-roster.md) holds what exists on this machine and
+how to invoke it. Different lifetimes, different files.
+
+```markdown
+# Đội hình dự án <tên>
+
+## Phân công
+| Vai | Ai | Model | Ghi chú |
+|-----|-----|-------|---------|
+| Viết plan chi tiết | <agent> | <model> | <vì sao chọn> |
+| Executor chính | <agent> | <model> | |
+| Việc nhỏ, cơ học | <agent> | <model> | |
+| Phản biện | <agent> | <model> | khác agent đã viết mã |
+
+## Năng lực quan sát được
+| Agent | Làm tốt | Đã hỏng ở đâu | Lần dùng gần nhất |
+|-------|---------|---------------|-------------------|
+| <agent> | <việc + bằng chứng> | <sự cố + bằng chứng> | <ngày / phase> |
+
+## Chưa quyết
+- <vai chưa có ai đảm nhiệm — phải hỏi user khi công việc cần tới>
+```
+
+**Record both wins and failures, each with evidence.** "Handled the aggregation
+engine, 11 tasks, 491 tests green" and "went silent 15 minutes holding a pipe on a
+DB script" are both assignments-relevant. Judgments without evidence decay into
+prejudice, and you will either over-trust an agent that got lucky once or refuse
+one that failed for a reason you've since fixed.
+
+Update it when a phase ends, and whenever an agent surprises you in either
+direction. An assignment table nobody maintains sends the next phase's work to
+whoever happened to be listed first.
 
 ## Quota Management
 
@@ -158,8 +230,9 @@ mistakes get multiplied.
 ## The Loop
 
 ```
+read team.md → who is assigned what here; ask the user if a role is unfilled
 for each task in plan:
-    check quota across roster → pick executor (strength + quota)
+    check quota across roster → pick executor (assignment + strength + quota)
     capture BASE commit
     dispatch ONE task (prompt → context file + task + area lessons)
     attach monitor immediately (exit: new commit / process dead / silence)
@@ -168,6 +241,7 @@ for each task in plan:
     convention-commit-gate    (enums, no magic literals, commit style)
     fix or re-dispatch if a gate fails
     record any lesson learned  → lessons-ledger
+    update team.md if an agent surprised you either way
 when a risky area is complete, before merge:
     adversarial-review-to-go  (converge findings to GO)
 then:
@@ -182,6 +256,9 @@ then:
 | "Its tests are green, the logic is right" | It wrote both. Recompute the expected values from fixtures and check against those. |
 | "Let it do the next task too, this one looks fine" | One task per checkpoint. Unreviewed work compounds. |
 | "I'll just assign it, quota is probably fine" | Check first. Silent quota failure looks exactly like "did nothing". |
+| "Everything else is out of quota — I'll spin up a subagent" | That spends the user's current session instead. If the project has no subagent history, ask which kind and for what role. |
+| "The user won't care which agent does this" | They pay for it, in different budgets. Silent substitution spends their resources for them. |
+| "I remember this agent is bad at that" | Check the team file. If the memory isn't recorded with evidence, it's prejudice — and the reason it failed may already be fixed. |
 | "I'll check on it in a while" | Attach a monitor at dispatch, with a real exit condition and a BASE commit. |
 | "I've got a watcher on it" (but didn't start one) | Say "no monitor, I'll poll next turn." A described-but-unstarted watch costs you the whole idle period. |
 | "It's been quiet, it must be working" | Silence is ambiguous. Check quota, process state, and whether any file changed. |

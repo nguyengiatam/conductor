@@ -40,10 +40,10 @@ Update to the latest pushed version any time with `/plugin marketplace update co
 | Skill | Purpose |
 |-------|---------|
 | `pointer-handoff` | One short pointer file per project: current state + next action. Read on resume, written before the session ends. |
-| `lessons-ledger` | Per-project lessons indexed by code area and work type, so only the relevant ones load — and get quoted into executor prompts. |
+| `lessons-ledger` | Per-project lessons indexed by code area and work type, so only the relevant ones load; project-wide ones get crystallized into the executor context file. |
 | `concept-briefing` | Locks a user-confirmed system profile, tiers each request, and routes it to the right amount of process — including a phased roadmap for layered work. |
 | `using-conductor` | Index/map of the workflow arc and where it meets superpowers. |
-| `orchestrating-executors` | Role separation, quota-aware selection, one-task handoffs, a monitor on every dispatch, parallel-run isolation, checkpoint protocol. |
+| `orchestrating-executors` | Workforce management: who is on the team and what they proved, subagent-vs-external choice, quota, one-task handoffs, a monitor on every dispatch, parallel isolation, checkpoint protocol. |
 | `executor-context` | One fixed context file the coordinator maintains, so handoffs point at it instead of retyping conventions. |
 | `checkpoint-verification` | Refuses green tests as proof; inspect call-site + drive the real runtime path. |
 | `adversarial-review-to-go` | External adversarial reviewer in converging rounds to GO; re-verify every finding. |
