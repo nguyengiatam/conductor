@@ -147,7 +147,7 @@ required — and subsequent handoff prompts cite the updated calibration.
 
 Since this change is a set of skill/doc files (not application code),
 verification is a dogfood dry run: apply `concept-briefing` to a real next
-task (in this repo or a consuming project like market-report) and confirm:
+task (in this repo or a consuming project) and confirm:
 1. The brief is produced with the right level of brevity for that task's
    actual size.
 2. `orchestrating-executors`'s handoff prompts actually quote the calibration

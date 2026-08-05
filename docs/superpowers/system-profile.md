@@ -7,8 +7,8 @@
 ## Quy mô & tải
 - **Người dùng:** ✓ **công khai trên GitHub** — người lạ cài được qua marketplace.
   Hệ quả cứng: mọi ví dụ trong skill phải **tự giải thích**, không được giả định
-  market-report hay bất kỳ project nào của tác giả; lệnh theo máy chỉ nằm trong
-  `executor-roster.md`.
+  bất kỳ project nội bộ nào của tác giả — không tên dự án, không số liệu vận
+  hành thật; lệnh theo máy chỉ nằm trong `executor-roster.md`.
 - Tải: ~ không có runtime. "Tải" duy nhất là **context Claude phải nạp** mỗi lần
   skill kích hoạt — đó mới là tài nguyên khan hiếm ở đây.
 - Tăng trưởng 12 tháng tới: ~ số skill tăng dần; mỗi skill thêm vào là thêm chi

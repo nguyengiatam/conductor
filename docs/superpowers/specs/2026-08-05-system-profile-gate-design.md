@@ -258,11 +258,11 @@ người dùng.
 phase sau đứng trên phase trước — giống cách xây nhà từ móng lên, hoặc cách học
 từng bước. Không phải danh sách việc rời rạc xếp cạnh nhau.
 
-Khuôn mẫu tham chiếu: `2026-07-28-market-report-rebuild-roadmap.md` của report
-service — P0 khung service → P1 định danh/phân quyền → P2 nạp dữ liệu → P3 danh
-mục chỉ tiêu và engine → P4 rollup ngày → P5 mẫu báo cáo → P6 vòng đời → P7 xuất
-file (**mốc dùng được**) → P8 lịch → P9 cổng ngoài và chuyển đổi. Mỗi phase mở
-khoá phase kế; không có P2 thì P3 không có gì để tính.
+Khuôn mẫu tham chiếu: roadmap dựng lại một dịch vụ báo cáo định kỳ — P0 khung
+service → P1 định danh/phân quyền → P2 nạp dữ liệu → P3 danh mục chỉ tiêu và
+engine → P4 rollup ngày → P5 mẫu báo cáo → P6 vòng đời → P7 xuất file (**mốc dùng
+được**) → P8 lịch → P9 cổng ngoài và chuyển đổi. Mỗi phase mở khoá phase kế;
+không có P2 thì P3 không có gì để tính.
 
 Hai điều roadmap đó làm đúng và phải giữ trong khuôn chung:
 
@@ -545,7 +545,7 @@ lần ở mức ranh giới để chia phase, rồi một lần đầy đủ cho
 Thay đổi này là file skill/doc, không phải code ứng dụng, nên verify bằng dry run
 thật:
 
-1. Chạy `concept-briefing` trên một project chưa có hồ sơ (market-report) →
+1. Chạy `concept-briefing` trên một project thật chưa có hồ sơ →
    xác nhận Claude sinh được bản nháp từ repo, hỏi đúng bốn dòng bắt buộc theo
    một lượt gộp, và **không đi tiếp** khi chưa được chốt.
 2. Chạy lại trên project đã có hồ sơ ĐÃ CHỐT → xác nhận không hỏi lại, chỉ đọc.
@@ -564,8 +564,6 @@ thật:
 8. Chạy trên một việc nhiều tầng → xác nhận Claude dựng `roadmap.md` có cây phụ
    thuộc và mốc dùng được, chỉ ở mức ranh giới (**không** thiết kế chi tiết phase
    2, 3), chốt với người dùng, rồi đo bậc lại cho riêng phase đầu.
-9. Đối chiếu khuôn roadmap sinh ra với
-   `market-report/docs/superpowers/plans/2026-07-28-market-report-rebuild-roadmap.md`:
-   các mục bắt buộc (phạm vi, định hướng đã chốt, bản đồ phase, chi tiết phase với
-   định nghĩa hoàn thành quan sát được) phải có mặt, và roadmap **không** chứa
-   trạng thái tiến độ.
+9. Đối chiếu khuôn roadmap sinh ra với khuôn mẫu tham chiếu: các mục bắt buộc
+   (phạm vi, định hướng đã chốt, bản đồ phase, chi tiết phase với định nghĩa hoàn
+   thành quan sát được) phải có mặt, và roadmap **không** chứa trạng thái tiến độ.
