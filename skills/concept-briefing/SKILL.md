@@ -1,6 +1,6 @@
 ---
 name: concept-briefing
-description: Use as the first step before superpowers:brainstorming on any new request — locks a user-confirmed system profile (scale, users, trade-off priorities) and tiers the request to route it to the right amount of process, so mechanical work skips spec/plan entirely and layered work gets a phased roadmap instead of one giant plan.
+description: Use as the first step on any new request, before design begins — locks a user-confirmed system profile (scale, users, trade-off priorities) and tiers the request to route it to the right amount of process, so mechanical work skips spec/plan entirely and layered work gets a phased roadmap instead of one giant plan.
 ---
 
 # Concept Briefing
@@ -45,8 +45,9 @@ exactly the rigidity this skill exists to remove.
 | T1 | suggest, never block |
 | T2, T3 | **hard gate** — do not proceed with an unconfirmed profile |
 
-At T2+, `concept-briefing` does not finish and `superpowers:brainstorming` does
-not start choosing approaches while the profile is `CHƯA CHỐT`.
+At T2+, `concept-briefing` does not finish and **design does not start choosing
+approaches** while the profile is `CHƯA CHỐT`. (On Claude Code the design step is
+`superpowers:brainstorming`; elsewhere it's whatever you design with.)
 
 **Four lines the user must answer directly** — never fill these in and call it
 done: real user count, scaling need, trade-off priority order, and what must
@@ -177,7 +178,7 @@ step 0: profile → step 1: tier + detect layers
        → executor → checkpoint-verification → convention-commit-gate
        → if a lesson changes direction, update the roadmap
   → adversarial-review-to-go (after each risky phase, or once at the end)
-  → superpowers:finishing-a-development-branch
+  → finish/merge the branch
 ```
 
 Every phase is re-tiered independently. A large roadmap can be mostly T1 phases —
@@ -195,8 +196,9 @@ and those take the T1 shortcut; nobody writes a spec for each.
 
 ## Handoff to the Rest of the Arc
 
-- `superpowers:brainstorming` reads both: the profile decides *which approach*
-  (how thin is allowed), the tier decides *how deep to probe*.
+- **The design step** reads both: the profile decides *which approach* (how thin
+  is allowed), the tier decides *how deep to probe*. On Claude Code that step is
+  `superpowers:brainstorming`.
 - `orchestrating-executors` quotes from the profile in every handoff prompt: the
   trade-off priority order, the boundaries that must not break, the expected test
   level. This is where the profile pays off most — an external executor is blind

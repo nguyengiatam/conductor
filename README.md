@@ -1,12 +1,13 @@
 # Conductor
 
-A Claude Code plugin packaging a **multi-agent delivery discipline**: Claude
-architects and reviews while external coding agents (agy, Codex, kiro,
-opencode, …) implement — under adversarial review-to-GO and real-runtime
-verification. It extends [superpowers](https://github.com/obra/superpowers)
-rather than replacing it.
+A plugin packaging a **multi-agent delivery discipline**: the coordinating agent
+architects and reviews while external coding agents (agy, Codex, kiro, opencode,
+…) implement — under adversarial review-to-GO and real-runtime verification.
 
-## Install
+Installs on **Claude Code** and **Codex**. On Claude Code it extends
+[superpowers](https://github.com/obra/superpowers) rather than replacing it.
+
+## Install — Claude Code
 
 From GitHub (recommended):
 
@@ -34,6 +35,39 @@ From a local clone (no network):
 ```
 
 Update to the latest pushed version any time with `/plugin marketplace update conductor-marketplace`.
+
+## Install — Codex
+
+```
+codex plugin marketplace add https://github.com/nguyengiatam/conductor.git
+codex plugin add conductor@conductor-marketplace
+```
+
+A local clone works the same way — pass the path instead of the URL. Verify with
+`codex plugin list`; the entry should read `installed, enabled`.
+
+Codex reads `.codex-plugin/plugin.json` and `.agents/plugins/marketplace.json`;
+Claude Code reads the two files under `.claude-plugin/`. Both point at the same
+`skills/` directory, so the skills themselves are identical on either harness.
+
+Remove with `codex plugin remove conductor` and
+`codex plugin marketplace remove conductor-marketplace`.
+
+### What differs on Codex
+
+- **No superpowers.** `brainstorming`, `writing-plans`, and
+  `finishing-a-development-branch` are Claude Code plugins. On Codex, do those
+  steps directly; the eight delta skills work standalone.
+- **No harness-tracked background jobs.** `orchestrating-executors` requires a
+  monitor on every dispatch — run it as a shell background job polling the BASE
+  commit, or say plainly that there is no monitor and poll next turn.
+
+### Maintainer note
+
+The version appears in **three** files and they must match:
+`.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, and
+`.codex-plugin/plugin.json`. Validate the Codex side with the `plugin-creator`
+skill's `validate_plugin.py`.
 
 ## Skills
 
@@ -84,5 +118,6 @@ file for your machine/agents; the skills stay unchanged.
 
 ## Relationship to superpowers
 
-Conductor is a delta. It assumes superpowers is installed for the
-brainstorm / plan / finish bookends. The eight delta skills also work standalone.
+On Claude Code, Conductor is a delta: it assumes superpowers is installed for the
+brainstorm / plan / finish bookends. The eight delta skills also work standalone,
+which is how they run on Codex.

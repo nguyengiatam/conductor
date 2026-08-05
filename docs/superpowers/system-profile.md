@@ -47,10 +47,15 @@ luật không tồn tại.
 
 ## Ràng buộc vận hành
 - ~ Phân phối qua GitHub marketplace. **Sửa file trong repo làm việc chưa tới tay
-  ai** — phải push, rồi người dùng chạy `/plugin marketplace update`.
-- ~ Bump version trong `plugin.json` **và** `marketplace.json` mỗi lần thêm/đổi
-  skill; hai file phải khớp.
-- ~ Không có CI, không có test tự động. Kiểm bằng dogfood.
+  ai** — phải push, rồi người dùng chạy `/plugin marketplace update` (Claude Code)
+  hoặc `codex plugin marketplace upgrade` (Codex).
+- ✓ **Cài được trên hai harness**: Claude Code đọc `.claude-plugin/`, Codex đọc
+  `.codex-plugin/plugin.json` + `.agents/plugins/marketplace.json`. Cả hai trỏ
+  vào cùng `skills/`.
+- ~ Version nằm ở **ba** file, phải khớp: `.claude-plugin/plugin.json`,
+  `.claude-plugin/marketplace.json`, `.codex-plugin/plugin.json`.
+- ~ Không có CI, không có test tự động. Kiểm bằng dogfood; phía Codex kiểm thêm
+  bằng `validate_plugin.py` của skill `plugin-creator`.
 
 ## Dữ liệu & tuân thủ
 - ~ Không có dữ liệu người dùng, không PII, không secret trong repo.

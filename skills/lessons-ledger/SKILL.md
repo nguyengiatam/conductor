@@ -135,12 +135,13 @@ Rules:
 | Scale, trade-off priorities, hard boundaries | `system-profile.md` (`concept-briefing`) |
 | Phase structure, what unlocks what | Roadmap (`concept-briefing`) |
 | Why a design was chosen | The spec for that work |
-| The user's preferences, machine access, working style | Claude Code's own memory — not this ledger |
+| The user's preferences, machine access, working style | Your harness's own memory store — not this ledger |
 
-The last row matters: Claude Code's memory holds facts about the *user* and their
-environment, loads by its own relevance rules, and is invisible to executors and
+The last row matters: a harness memory store (Claude Code's `memory/`, Codex's
+`memories/`) holds facts about the *user* and their environment, loads by its own
+relevance rules, lives outside the repo, and is invisible to executors and
 teammates. The ledger holds technical lessons about *this codebase*, lives in the
-repo, gets reviewed, and can be pasted into a prompt. They are not substitutes.
+repo, gets reviewed, and travels with the branch. They are not substitutes.
 
 ## Red Flags
 

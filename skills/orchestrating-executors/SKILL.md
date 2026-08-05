@@ -8,9 +8,10 @@ description: Use when a plan is ready and implementation will be delegated to ex
 You are the architect and reviewer. External coding agents (the "executors")
 implement the plan one task at a time; you gate every task before the next begins.
 
-This is different from `superpowers:subagent-driven-development`, which dispatches
-Claude subagents. Here the executors are separate tools with their own quotas,
-quirks, and failure modes. Their exact invocation lives in
+This covers executors that are **separate tools with their own quotas, quirks, and
+failure modes** — as opposed to subagents inside your own harness (on Claude Code,
+`superpowers:subagent-driven-development` covers those). See *Knowing Your
+Workforce* below for choosing between the two. Exact invocations live in
 [references/executor-roster.md](references/executor-roster.md) — read it before
 dispatching. Keep this skill's body agent-agnostic; all machine-specific commands
 stay in the roster.
@@ -182,8 +183,17 @@ another repo), stop and reconcile before continuing — do not paper over it.
 ## Monitoring Every Dispatch
 
 **Every dispatch gets a monitor, attached at the moment of dispatch.** Not "I'll
-check back" — an actual watch with an exit condition, registered with whatever
-your harness uses to track background work.
+check back" — an actual watch with an exit condition.
+
+How you attach it depends on the harness, in this order of preference:
+
+1. **Harness-tracked background work**, if your harness has it — it notifies you.
+2. **A shell background job** that polls the exit condition and exits when met.
+   Works anywhere with a shell, including harnesses that run dispatches
+   synchronously.
+3. **Neither available** → say plainly "no monitor — I'll poll next turn", and
+   then actually poll. This is a worse option, not a forbidden one; what's
+   forbidden is claiming option 1 or 2 while doing option 3.
 
 Three rules, each paid for in lost time:
 
@@ -245,7 +255,7 @@ for each task in plan:
 when a risky area is complete, before merge:
     adversarial-review-to-go  (converge findings to GO)
 then:
-    superpowers:finishing-a-development-branch
+    finish/merge the branch (superpowers:finishing-a-development-branch on Claude Code)
 ```
 
 ## Red Flags

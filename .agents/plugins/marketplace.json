@@ -1,0 +1,19 @@
+{
+  "name": "conductor-marketplace",
+  "interface": {
+    "displayName": "Conductor"
+  },
+  "plugins": [
+    {
+      "name": "conductor",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

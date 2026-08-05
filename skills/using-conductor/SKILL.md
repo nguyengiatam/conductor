@@ -17,11 +17,11 @@ between them.
 which steps below actually run. What follows is the T2/T3 path — the full one.
 
 ```
-conductor:pointer-handoff        → (ongoing project) read the pointer, reconcile with reality
-conductor:lessons-ledger         → pull only the lessons matching this area + kind of work
-conductor:concept-briefing       → confirm system profile, tier the request, route
-superpowers:brainstorming        → design the change (steered by the profile)
-superpowers:writing-plans        → task-by-task plan with real code
+pointer-handoff                  → (ongoing project) read the pointer, reconcile with reality
+lessons-ledger                   → pull only the lessons matching this area + kind of work
+concept-briefing                 → confirm system profile, tier the request, route
+[superpowers:brainstorming]      → design the change (steered by the profile)
+[superpowers:writing-plans]      → task-by-task plan with real code
 
    ┌─ executor-context           → keep the fixed context file current; handoffs point at it
    ├─ orchestrating-executors    → check quota, hand off ONE task, attach a monitor at dispatch
@@ -30,9 +30,14 @@ superpowers:writing-plans        → task-by-task plan with real code
    └─  (loop per task; fix or re-dispatch if a gate fails; re-tier if scope diverges)
 
 adversarial-review-to-go         → external reviewer, converge findings to GO
-superpowers:finishing-a-development-branch → merge / PR / cleanup
-conductor:pointer-handoff        → write state + next action before the session ends
+[superpowers:finishing-a-development-branch] → merge / PR / cleanup
+pointer-handoff                  → write state + next action before the session ends
 ```
+
+Steps in `[brackets]` come from the **superpowers** plugin, which exists on Claude
+Code. On a harness without it, do that step directly — design before building,
+write the plan before delegating, integrate deliberately at the end — and the
+Conductor skills around it are unchanged.
 
 `pointer-handoff` brackets the whole arc: read at the start, written at the end
 and whenever something significant surfaces mid-session. `lessons-ledger` is
@@ -92,5 +97,18 @@ batched. Verification gates are never skipped when real code gets written.
 - The executor roster is machine-specific and lives in one file; the skills are
   portable.
 
-If superpowers is not installed, the eight delta skills still work standalone —
-you just lose the brainstorm/plan/finish bookends this map references.
+## Across Harnesses
+
+Conductor installs on any agent harness that loads `SKILL.md` folders (Claude Code
+and Codex both do). Two things differ by harness — neither changes the discipline:
+
+- **Bookend skills.** `brainstorming`, `writing-plans`, and
+  `finishing-a-development-branch` ship with superpowers on Claude Code. Elsewhere,
+  do those steps directly; the eight delta skills work standalone.
+- **Background work.** `orchestrating-executors` requires a monitor on every
+  dispatch. Where the harness tracks background jobs, use that; where it doesn't,
+  run the dispatch as a shell background job and poll against the BASE commit. If
+  neither is possible, say so out loud rather than implying a watch exists.
+
+Skill names are referenced without a namespace prefix here, because the prefix
+differs per harness. Invoke them however your harness invokes skills.
