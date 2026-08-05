@@ -23,7 +23,8 @@ conductor:concept-briefing       → confirm system profile, tier the request, r
 superpowers:brainstorming        → design the change (steered by the profile)
 superpowers:writing-plans        → task-by-task plan with real code
 
-   ┌─ orchestrating-executors    → pick executor (roster), hand off ONE task
+   ┌─ executor-context           → keep the fixed context file current; handoffs point at it
+   ├─ orchestrating-executors    → pick executor (roster), hand off ONE task
    │     checkpoint-verification  → inspect call-site + drive real runtime path
    │     convention-commit-gate   → enums, no magic literals, commit style
    └─  (loop per task; fix or re-dispatch if a gate fails; re-tier if scope diverges)
@@ -35,9 +36,9 @@ conductor:pointer-handoff        → write state + next action before the sessio
 
 `pointer-handoff` brackets the whole arc: read at the start, written at the end
 and whenever something significant surfaces mid-session. `lessons-ledger` is
-consulted before working in an area (and quoted into executor prompts), and
-written the moment a diagnosis proves wrong or verification catches what the
-tests missed.
+consulted before working in an area, and written the moment a diagnosis proves
+wrong or verification catches what the tests missed; its project-wide lessons get
+crystallized into the `executor-context` file rather than pasted into prompts.
 
 Large layered work inserts one step: `concept-briefing` produces a **roadmap** of
 phases from foundation upward, then each phase runs the arc above on its own,
@@ -66,6 +67,7 @@ batched. Verification gates are never skipped when real code gets written.
 | Deciding what to build | `superpowers:brainstorming` |
 | Turning a spec into tasks | `superpowers:writing-plans` |
 | Handing a task to an external agent | `orchestrating-executors` |
+| Writing project context executors reuse every dispatch | `executor-context` |
 | Accepting an executor's result | `checkpoint-verification` |
 | Committing at a checkpoint | `convention-commit-gate` |
 | Hardening a risky area before merge | `adversarial-review-to-go` |
@@ -87,5 +89,5 @@ batched. Verification gates are never skipped when real code gets written.
 - The executor roster is machine-specific and lives in one file; the skills are
   portable.
 
-If superpowers is not installed, the seven delta skills still work standalone —
+If superpowers is not installed, the eight delta skills still work standalone —
 you just lose the brainstorm/plan/finish bookends this map references.

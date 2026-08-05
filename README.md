@@ -44,6 +44,7 @@ Update to the latest pushed version any time with `/plugin marketplace update co
 | `concept-briefing` | Locks a user-confirmed system profile, tiers each request, and routes it to the right amount of process — including a phased roadmap for layered work. |
 | `using-conductor` | Index/map of the workflow arc and where it meets superpowers. |
 | `orchestrating-executors` | Reviewer/executor split, per-task checkpoint protocol, quota-aware executor selection. |
+| `executor-context` | One fixed context file the coordinator maintains, so handoffs point at it instead of retyping conventions. |
 | `checkpoint-verification` | Refuses green tests as proof; inspect call-site + drive the real runtime path. |
 | `adversarial-review-to-go` | External adversarial reviewer in converging rounds to GO; re-verify every finding. |
 | `convention-commit-gate` | Centralized enums, no magic literals, project commit style. |
@@ -84,4 +85,4 @@ file for your machine/agents; the skills stay unchanged.
 ## Relationship to superpowers
 
 Conductor is a delta. It assumes superpowers is installed for the
-brainstorm / plan / finish bookends. The seven delta skills also work standalone.
+brainstorm / plan / finish bookends. The eight delta skills also work standalone.

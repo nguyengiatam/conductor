@@ -88,17 +88,22 @@ is an opinion, and the next session cannot tell whether it still holds.
 Do this before writing code in an unfamiliar area, before dispatching an executor
 there, and before re-attempting anything that failed once.
 
-## Handing Lessons to Executors
+## Getting Lessons to Executors
 
-An external executor starts from zero, works in the code repo, and **cannot see
-the documentation repo at all**. So:
+An executor starts from zero every dispatch, so a lesson it never sees is a
+lesson it will re-learn the expensive way. Route by how widely the lesson
+applies — **never by pasting the ledger into prompts**, which repeats forever and
+grows with every dispatch:
 
-**Quote the matching lessons verbatim into the handoff prompt.** A path reference
-is useless to something that can't open the path. Include the rule and the
-"Áp dụng" line; the evidence is optional if the prompt is getting long.
+| Scope of the lesson | Where it goes |
+|---------------------|---------------|
+| Applies to **every task** in the project | Crystallize it as a rule in the executor context file (`executor-context`). One line of imperative; the ledger keeps the evidence and reasoning. |
+| Applies to **the area this task touches** | One line in this task's handoff prompt, phrased as a constraint — not the whole lesson file. |
+| Applies to neither | Leave it in the ledger. It'll be found by lookup when its area comes up. |
 
-This is also the point where lessons pay for themselves most: the executor is the
-one about to repeat the mistake.
+The ledger is the archive with the "why"; the executor gets the imperative. Those
+are different documents on purpose — an executor doesn't need to be convinced,
+it needs to know.
 
 ## Recording (immediately, not at session end)
 
@@ -126,6 +131,7 @@ Rules:
 | Content | Where |
 |---------|-------|
 | Current state, what's half-done, next action | `pointer-handoff` |
+| Conventions every task must follow | Executor context file (`executor-context`) |
 | Scale, trade-off priorities, hard boundaries | `system-profile.md` (`concept-briefing`) |
 | Phase structure, what unlocks what | Roadmap (`concept-briefing`) |
 | Why a design was chosen | The spec for that work |
@@ -143,7 +149,7 @@ repo, gets reviewed, and can be pasted into a prompt. They are not substitutes.
 | "I'll read all the lessons to be safe" | Then the index was pointless and every session pays for every lesson. Filter, open what matches. |
 | "Kind of related, I'll apply it" | A forced lesson misdirects the work. No match means no match. |
 | "I'll record this at the end of the session" | Record it now. The reasoning that misled you is freshest — and clearest — at the moment it's refuted. |
-| "The executor can read the ledger path" | It cannot see that repo. Quote the lesson into the prompt. |
+| "I'll paste the matching lessons into the prompt" | That repeats every dispatch and never ends. Project-wide lessons become rules in the executor context file; area lessons become one constraint line. |
 | "Rollup crashed on Aug 4 — that's the lesson" | That's the evidence. The lesson is the rule that transfers to the next long-running job. |
 | "I was wrong, but recording it is embarrassing" | Wrong diagnoses are the highest-value entries here. The next session repeats them otherwise. |
 | "Lesson written, index later" | Later never comes and an unindexed lesson is invisible. Same commit. |

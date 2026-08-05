@@ -1,7 +1,7 @@
 {
   "name": "conductor",
   "description": "Multi-agent delivery discipline: Claude architects and reviews while external executors implement, under adversarial review-to-GO and real-runtime verification. Extends superpowers.",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "author": {
     "name": "Nguyễn Gia Tâm"
   },
