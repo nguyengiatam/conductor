@@ -43,7 +43,7 @@ Update to the latest pushed version any time with `/plugin marketplace update co
 | `lessons-ledger` | Per-project lessons indexed by code area and work type, so only the relevant ones load — and get quoted into executor prompts. |
 | `concept-briefing` | Locks a user-confirmed system profile, tiers each request, and routes it to the right amount of process — including a phased roadmap for layered work. |
 | `using-conductor` | Index/map of the workflow arc and where it meets superpowers. |
-| `orchestrating-executors` | Reviewer/executor split, per-task checkpoint protocol, quota-aware executor selection. |
+| `orchestrating-executors` | Role separation, quota-aware selection, one-task handoffs, a monitor on every dispatch, parallel-run isolation, checkpoint protocol. |
 | `executor-context` | One fixed context file the coordinator maintains, so handoffs point at it instead of retyping conventions. |
 | `checkpoint-verification` | Refuses green tests as proof; inspect call-site + drive the real runtime path. |
 | `adversarial-review-to-go` | External adversarial reviewer in converging rounds to GO; re-verify every finding. |

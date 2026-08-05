@@ -24,7 +24,7 @@ superpowers:brainstorming        → design the change (steered by the profile)
 superpowers:writing-plans        → task-by-task plan with real code
 
    ┌─ executor-context           → keep the fixed context file current; handoffs point at it
-   ├─ orchestrating-executors    → pick executor (roster), hand off ONE task
+   ├─ orchestrating-executors    → check quota, hand off ONE task, attach a monitor at dispatch
    │     checkpoint-verification  → inspect call-site + drive real runtime path
    │     convention-commit-gate   → enums, no magic literals, commit style
    └─  (loop per task; fix or re-dispatch if a gate fails; re-tier if scope diverges)
@@ -86,6 +86,9 @@ batched. Verification gates are never skipped when real code gets written.
 - Every finding from any reviewer is re-verified on real source before it is
   applied — never blindly.
 - Green tests are never acceptance; the call-site and real runtime path are.
+- Whoever writes the code does not certify it. Recompute expected values yourself.
+- Every dispatch gets a monitor attached at dispatch — and a monitor you describe
+  but never start is worse than admitting there isn't one.
 - The executor roster is machine-specific and lives in one file; the skills are
   portable.
 

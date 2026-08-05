@@ -1,64 +1,173 @@
 ---
 name: orchestrating-executors
-description: Use when a plan is ready and implementation will be delegated to an external coding agent (not a Claude subagent) — establishes the reviewer/executor split, the per-task checkpoint protocol, and quota-aware executor selection.
+description: Use when a plan is ready and implementation will be delegated to external coding agents or subagents — covers role separation, quota-aware executor selection, one-task handoffs, mandatory monitoring of every dispatch, parallel-run isolation, and the per-task checkpoint protocol.
 ---
 
 # Orchestrating External Executors
 
-You are the architect and reviewer. You do not write business code. External coding agents (the "executors") implement the plan one task at a time; you gate every task before the next begins.
+You are the architect and reviewer. External coding agents (the "executors")
+implement the plan one task at a time; you gate every task before the next begins.
 
-This is different from `superpowers:subagent-driven-development`, which dispatches Claude subagents. Here the executors are separate tools with their own quotas, quirks, and failure modes. Their exact invocation lives in [references/executor-roster.md](references/executor-roster.md) — read it before dispatching. Keep this skill's body agent-agnostic; all machine-specific commands stay in the roster.
+This is different from `superpowers:subagent-driven-development`, which dispatches
+Claude subagents. Here the executors are separate tools with their own quotas,
+quirks, and failure modes. Their exact invocation lives in
+[references/executor-roster.md](references/executor-roster.md) — read it before
+dispatching. Keep this skill's body agent-agnostic; all machine-specific commands
+stay in the roster.
 
 ## Roles
 
-- **Claude (you):** design the plan (via `superpowers:writing-plans`), pick the executor, hand off one task, then review and verify the result. Write code yourself only for foundation, concurrency-critical, or verification code where precision matters more than delegation.
-- **Executor:** implements exactly one task, commits it, and stops. Never let an executor run multiple tasks unreviewed.
-- **Adversarial reviewer:** a second external agent that stress-tests the result — see `adversarial-review-to-go`.
+Four roles. One agent may hold several — with one exception that is never
+negotiable.
 
-## The Checkpoint Protocol
+| Role | Does | Notes |
+|------|------|-------|
+| **Coordinator** (you) | Splits work, dispatches, monitors, verifies, decides | Never delegate this |
+| **Plan author** | Turns a short spec into a task-by-task plan with real code | Often worth delegating: plans are long to write and cheap to review |
+| **Executor** | Implements exactly one task, then stops | May be several in parallel |
+| **Adversarial reviewer** | Stress-tests the result — see `adversarial-review-to-go` | Prefer a different agent than the one that wrote the code |
 
-A **checkpoint** is the reviewable unit: **one plan task → one commit on a feature branch → executor stops → you review.** Enforce all of:
+**The non-negotiable: whoever writes the code does not get to certify it.** An
+executor that writes both the function and its tests has proven only that the code
+matches itself. When accepting such work, compute the expected numbers yourself
+from the fixtures and check the output against *those* — not against the
+executor's assertions. This is what makes it safe to delegate even business
+logic: the rigor moves to verification instead of staying in authorship.
 
-1. One task per handoff. The prompt to the executor names the single task, the current HEAD, the baseline test state, and the safety rules for this repo.
-2. The executor commits its own work with the task's commit message, then halts.
-3. You review before releasing the next task. Reviewing means running `checkpoint-verification`, then `convention-commit-gate`, on the actual diff — not trusting the executor's summary.
-4. Verification output is real and pasted. "Tests pass" without the run output is not acceptance.
-
-If an executor violated the protocol (ran ahead, skipped verify, edited another repo), stop and reconcile before continuing — do not paper over it.
+You may write code yourself for foundation, concurrency-critical, or verification
+code where precision beats delegation. Also for **purely mechanical work already
+spelled out in the plan** — arguing with a weak executor costs more than typing it.
 
 ## Selecting an Executor
 
-**Check quota across the whole roster before assigning heavy work.** An executor that is out of quota can fail silently (exit 0, empty output) and burn your time. The roster documents the quota-check command for each.
+**Check quota across the whole roster before assigning heavy work**, not just for
+the one you intend to use — you need to know your fallbacks before you need them.
 
-Selection order is quota-and-strength-based, not fixed:
-- Prefer the executor with the most remaining quota that is strong at the task type.
-- Route review-heavy, concurrency-sensitive work to the reviewer-strong agent (see roster).
-- **Purely mechanical work** (enum/field/error-code changes already spelled out in the plan) — do it yourself. Arguing with a weak executor costs more than typing it.
-- Reserve some quota on at least one agent as a fallback / second opinion.
+Then match work to agent:
 
-## Handoff Prompt Checklist
+| Work | Route to |
+|------|----------|
+| Writing detailed plans from a spec | The strongest reasoning agent available; you review rather than write |
+| Business logic, algorithms, anything with a subtle contract | A capable executor **plus** independent verification of the numbers |
+| Mechanical: scaffolding, copying modules, CRUD, enum plumbing | The cheapest agent with quota — or yourself if it's fully specified |
+| Review of concurrency, migration, crash-gap | The review-strong agent, and never the one that wrote the code |
 
-Every executor prompt includes:
-- The single task and its acceptance criteria (copy from the plan).
+Reserve quota on at least one agent as a fallback and second opinion. Running
+every agent to zero leaves you unable to review what the last one produced.
+
+## Quota Management
+
+Quota is a resource you allocate across a phase, not a thing you check once.
+
+- **Silent exhaustion is the classic trap.** An agent out of quota often runs,
+  prints a line of preamble, exits 0 with near-empty output — indistinguishable
+  from "ran but did nothing" until you look for the work it didn't do. The roster
+  documents each agent's quota-check command; run it rather than inferring from
+  behavior.
+- **Check before dispatching heavy or parallel work**, and re-check after a
+  suspiciously fast or empty result.
+- **Know the reset windows.** An agent that resets in a few hours is worth waiting
+  for; one on a weekly window must be spent deliberately.
+- **Budget by role.** Reviews are token-heavy and repeat over rounds; a converging
+  review loop can cost more than the implementation did. Don't spend the reviewer's
+  quota on implementation you could route elsewhere.
+- When an agent goes quiet mid-task, **check quota before debugging the task** —
+  it's the cheaper hypothesis.
+
+## Dispatching One Task
+
+A **checkpoint** is the reviewable unit: **one plan task → one commit on a feature
+branch → executor stops → you review.** Enforce all of:
+
+1. One task per handoff. The prompt names the single task, the current HEAD, the
+   baseline test state, and this repo's safety rules.
+2. The executor commits its own work (or stops without committing, if that's your
+   convention) and halts.
+3. You review before releasing the next task: `checkpoint-verification`, then
+   `convention-commit-gate`, on the actual diff — never on the executor's summary.
+4. Verification output is real and pasted. "Tests pass" without the run output is
+   not acceptance.
+
+If an executor violated the protocol (ran ahead, skipped verification, edited
+another repo), stop and reconcile before continuing — do not paper over it.
+
+### Handoff prompt checklist
+
+- The single task and its acceptance criteria, copied from the plan.
 - Current HEAD SHA and the baseline test count/state.
-- The instruction to reconcile against real code/enums before hardcoding anything (executors catch plan errors this way — when one stops to ask, take it seriously).
-- The convention requirements from `convention-commit-gate` for any new code.
-- **From `concept-briefing`'s `system-profile.md`** — the executor is blind to all of this, so quote it rather than referencing it: the trade-off priority order and what must never be traded away, the system boundaries that must not break, and the expected test level. Without these an executor defaults to its own habits and either over-engineers a 200-user internal tool or under-scrutinizes a critical one.
-- The tier from `concept-briefing` (T0–T3 + business-criticality), so the executor knows how much rigor this task actually needs. At T1 there is no `concept-brief.md` — state the tier inline. If no profile exists either (Conductor adopted mid-project), infer from the plan's Architecture section or ask the user directly.
-- **A pointer to the executor context file** (see `executor-context`) instead of restating project conventions, scope boundaries, test rules, and reporting requirements in every prompt. Keep that file current rather than growing the prompt; if something is missing there, fix the file.
-- **Any lesson specific to the area this task touches**, as one constraint line — check `lessons-ledger` by area and work type. Project-wide lessons belong in the context file, not here.
-- Repo safety rules for this dispatch (branch, ports/DB isolation if parallel, which files another executor is holding).
+- **A pointer to the executor context file** (see `executor-context`) instead of
+  restating project conventions, scope boundaries, test rules, and reporting
+  requirements every time. If something is missing there, fix the file rather
+  than growing the prompt.
+- Any lesson specific to the area this task touches, as one constraint line —
+  check `lessons-ledger` by area and work type.
+- The instruction to reconcile against real code/enums before hardcoding anything.
+  **When an executor stops to question the plan, take it seriously** — that is
+  usually a hole in your handoff, not a defect in the executor.
+- Safety rules for this dispatch: branch, port/DB isolation if parallel, which
+  files another executor is currently holding.
+
+## Monitoring Every Dispatch
+
+**Every dispatch gets a monitor, attached at the moment of dispatch.** Not "I'll
+check back" — an actual watch with an exit condition, registered with whatever
+your harness uses to track background work.
+
+Three rules, each paid for in lost time:
+
+1. **Attach the monitor immediately when the executor is launched.** Exit
+   condition is concrete: *a new commit appears*, *the process dies*, or *the log
+   is silent past a threshold*. Not "the task finishes" — you cannot observe that.
+2. **Capture the BASE commit at dispatch and pass it to the monitor.** Without a
+   baseline, "a new commit appeared" is unanswerable, and you'll mistake an old
+   commit for progress.
+3. **Never describe a monitoring mechanism you did not actually start.** If you
+   cannot set one up, say plainly: "no monitor — I'll poll next turn." Claiming a
+   watch that was never running silently converts an idle executor into lost time,
+   because nothing will tell you it stalled.
+
+Rule 3 exists because it happened: a described-but-unstarted monitor cost half an
+hour of a dead dispatch. The failure mode is specifically that everything *looks*
+fine.
+
+**Silence is ambiguous** — it can be an agent working, an agent out of quota, or a
+process holding a pipe waiting for input that will never come. Distinguish them by
+evidence: process state, quota check, log timestamps, and whether any file changed.
+Prefer data over process liveness: a process that is still alive proves nothing
+about whether the work is done, and one that exited proves nothing about whether
+it succeeded.
+
+## Running Executors in Parallel
+
+Parallel dispatch is where throughput comes from, and where the coordinator's
+mistakes get multiplied.
+
+- **Partition by file, and say so explicitly in every prompt** — list the files
+  each other executor is holding, with "do not touch, not even to fix an error."
+- **Isolate shared resources**: ports, databases, fixture directories. Two
+  executors sharing a test database will produce failures that belong to neither.
+- **Warn that repo-wide lint/typecheck will show foreign errors.** Tell them to
+  scope their own check to their files and to report which errors came from
+  outside their scope — otherwise they will "helpfully" fix someone else's file
+  and destroy the isolation.
+- **Keep the checkpoint discipline per executor.** Parallel dispatch means several
+  one-task handoffs at once, not one executor running several tasks.
+- Prefer parallelizing tasks that share no interface. Two tasks touching the same
+  contract should be sequential, however tempting the speedup looks.
 
 ## The Loop
 
 ```
 for each task in plan:
-    select executor (quota + strength)  → roster
-    hand off one task
-    executor implements + commits + stops
-    checkpoint-verification   (inspect call-site + real runtime path)
+    check quota across roster → pick executor (strength + quota)
+    capture BASE commit
+    dispatch ONE task (prompt → context file + task + area lessons)
+    attach monitor immediately (exit: new commit / process dead / silence)
+    executor implements + stops
+    checkpoint-verification   (call-site + real runtime path; recompute expected numbers yourself)
     convention-commit-gate    (enums, no magic literals, commit style)
     fix or re-dispatch if a gate fails
+    record any lesson learned  → lessons-ledger
 when a risky area is complete, before merge:
     adversarial-review-to-go  (converge findings to GO)
 then:
@@ -70,9 +179,14 @@ then:
 | Thought | Reality |
 |---------|---------|
 | "The executor said tests pass, ship it" | Run `checkpoint-verification` yourself. Summaries hide skipped links. |
-| "Let it do the next task too, this one looks fine" | One task per checkpoint. Compounding unreviewed work compounds bugs. |
-| "I'll just assign it, quota is probably fine" | Check quota first. Silent quota failure looks like 'did nothing'. |
+| "Its tests are green, the logic is right" | It wrote both. Recompute the expected values from fixtures and check against those. |
+| "Let it do the next task too, this one looks fine" | One task per checkpoint. Unreviewed work compounds. |
+| "I'll just assign it, quota is probably fine" | Check first. Silent quota failure looks exactly like "did nothing". |
+| "I'll check on it in a while" | Attach a monitor at dispatch, with a real exit condition and a BASE commit. |
+| "I've got a watcher on it" (but didn't start one) | Say "no monitor, I'll poll next turn." A described-but-unstarted watch costs you the whole idle period. |
+| "It's been quiet, it must be working" | Silence is ambiguous. Check quota, process state, and whether any file changed. |
+| "Process is still alive, so it's still working" | Liveness proves nothing. Check the data it should have produced. |
 | "This tiny mechanical change — delegate it" | If it's fully specified, you're faster than the round-trip. |
 | "The executor is wrong, override it" | When an executor stops to question the plan, it's often right. Verify against source before dismissing. |
-| "It hit the same trap we hit last phase" | The lesson never reached it. Promote it into the executor context file — you are the constant in that pattern. |
+| "It hit the same trap as last phase" | The lesson never reached it. Promote it into the executor context file — you are the constant in that pattern. |
 | "I'll restate the conventions in this prompt" | Point at the context file and fix the file. Retyped conventions drift and get omitted under pressure. |

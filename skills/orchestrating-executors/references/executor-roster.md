@@ -35,6 +35,22 @@ nothing." Confirm quota first.
   `"rate_limits"`; `primary.used_percent` is the WEEKLY window. For fresh
   numbers ping `codex exec --json --skip-git-repo-check "ok"` (cheap) then grep.
 
+## How to monitor each (exit conditions for the dispatch watcher)
+
+`orchestrating-executors` requires a monitor attached at dispatch. What is
+actually observable differs per agent — record it here, not in the skill.
+
+- **Universal:** new commit past the BASE SHA captured at dispatch; any change to
+  the files in scope; process exit.
+- **agy / opencode:** background job exit; empty output on a multi-step task means
+  the prompt form was wrong (see gotchas), not that the work is done.
+- **Codex:** a new session/state file appearing is the signal that the job really
+  started — **absence of one means it never ran** (typically quota). Do not wait
+  for a completion notice that will not come.
+- **kiro:** poll liveness with `kill -0 <pid>`. Silent >5 min with no token spend
+  usually means a child process is holding a pipe waiting for EOF — inspect
+  children of `kiro-cli-chat` and kill the pipe holder, not the parent by pattern.
+
 ## agy (executor — mechanical/docs, general implementation)
 
 - **Invoke:** write the task to a scratch file, then
