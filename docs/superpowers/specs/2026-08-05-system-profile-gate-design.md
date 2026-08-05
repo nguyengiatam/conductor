@@ -10,9 +10,10 @@
    phải quyết định quy trình phía sau chạy những bước nào. Hiện phép đo chỉ sinh
    ra một dòng chữ rồi mọi request vẫn đi qua đúng một đường ống: spec → plan →
    executor, kể cả những việc đơn giản, ít thay đổi.
-3. **Phân tầng kế hoạch cho việc lớn**: dựng roadmap các phần trước, chỉ phân
-   tích chi tiết khi tới lượt từng phần — thay vì cố dựng một spec/plan khổng lồ
-   cho toàn bộ chương trình ngay từ đầu, khi hiểu biết còn ít nhất.
+3. **Chia phase cho việc lớn**: dựng roadmap các phase trước, mỗi phase vừa một
+   phiên làm việc và kết thúc ở trạng thái bàn giao được; chỉ phân tích chi tiết
+   khi tới lượt từng phase. Tránh tình trạng một task quá lớn bị làm trong một
+   phiên dài lê thê, context đầy dần và chất lượng tụt ở nửa sau.
 
 ## Problem
 
@@ -248,17 +249,36 @@ người dùng.
   không khả thi, chỉ còn một đường). Không hạ bậc vì muốn đi nhanh.
 - Mỗi lần đổi bậc phải nói cho người dùng biết lý do, một dòng.
 
-## Phân tầng kế hoạch: roadmap trước, chi tiết sau
+## Phân tầng kế hoạch: chia phase cho việc lớn
 
-### Vì sao tách khỏi bậc
+### Vấn đề cần giải
 
-Bậc T0–T3 đo **mức rủi ro và độ khó của quyết định**. Việc có chia được thành
-nhiều phần giao độc lập hay không là **trục khác**: đổi cách tính một số liệu tiền
-là T3 nhưng chỉ có một phần, không cần roadmap; dựng bốn màn hình quản trị theo
-cùng một khuôn là T2 nhưng rất đáng chia phần.
+Một task lớn không chia phase sẽ bị làm trong **một phiên quá dài**: context đầy
+dần, những thứ quyết định ở đầu phiên bị đẩy ra khỏi tầm nhớ, chất lượng tụt dần
+về cuối, và nếu phiên đứt giữa chừng thì công việc nằm ở trạng thái dở dang không
+ai nối lại được. Chia phase là để **mỗi đơn vị công việc vừa một phiên** và kết
+thúc ở trạng thái sạch.
 
-**Điều kiện kích hoạt:** công việc chia được từ **3 phần nghiệm thu độc lập** trở
-lên. Áp dụng cho cả T2 và T3; T0/T1 theo định nghĩa không bao giờ chạm ngưỡng này.
+Bậc T0–T3 không giải được việc này: bậc đo **mức rủi ro và độ khó của quyết
+định**, còn phase đo **khối lượng phải giữ trong đầu cùng lúc**. Đổi cách tính một
+số liệu tiền là T3 nhưng gọn trong một phiên; dựng bốn màn hình quản trị theo cùng
+một khuôn chỉ là T2 nhưng chắc chắn tràn phiên.
+
+### Điều kiện kích hoạt
+
+Dựng roadmap khi **một trong hai** điều sau đúng:
+
+1. Công việc chia được từ **3 phần nghiệm thu độc lập** trở lên; **hoặc**
+2. Ước lượng công việc **không gọn trong một phiên** — đây mới là điều kiện hay
+   gặp và quan trọng hơn.
+
+Dấu hiệu "không gọn trong một phiên", theo thứ tự dễ nhận biết:
+- Phải sửa nhiều vùng code không liên quan trực tiếp với nhau.
+- Phải nạp và giữ hiểu biết về nhiều tầng cùng lúc (schema + service + UI + job).
+- Executor sẽ cần nhiều vòng bàn giao/kiểm mới xong.
+- Chỉ riêng việc đọc hiểu bối cảnh đã chiếm phần lớn phiên.
+
+Áp dụng cho cả T2 và T3; T0/T1 theo định nghĩa không bao giờ chạm ngưỡng này.
 
 ### Artifact
 
@@ -269,17 +289,32 @@ và plan.
 # Roadmap: <topic>
 
 **Chốt với user:** YYYY-MM-DD
-**Nguyên tắc:** chỉ dựng khung ở đây. Phần chưa tới lượt KHÔNG phân tích chi tiết.
+**Nguyên tắc:** chỉ dựng khung ở đây. Phase chưa tới lượt KHÔNG phân tích chi tiết.
 
-## Phần 1 — <tên>
+## Trạng thái
+- Đang ở: Phase 2
+- Đã xong: Phase 1 (commit abc1234)
+- Điều học được ảnh hưởng phase sau: <1–3 gạch đầu dòng, hoặc "chưa có">
+
+## Phase 1 — <tên>
 - Mục tiêu: <1 câu>
 - Phạm vi: <1–2 dòng, đủ để biết cái gì nằm trong, cái gì nằm ngoài>
-- Phụ thuộc: <không / phần nào>
+- Phụ thuộc: <không / phase nào>
 - Tiêu chí xong: <quan sát được, không phải "code chạy">
 - Bậc dự kiến: <T1/T2/T3 — ước lượng, chốt lại khi tới lượt>
+- Trạng thái: chưa làm | đang làm | xong (commit <hash>)
 
-## Phần 2 — ...
+## Phase 2 — ...
 ```
+
+Mục **Trạng thái** ở đầu file là mức tối thiểu để roadmap không thành danh sách
+mong muốn: phiên mới đọc là biết đang ở đâu, phase trước để lại gì, làm tiếp cái
+gì — thay vì dò lại từ git log.
+
+Việc chuyển tiếp giữa các phiên cho đầy đủ (con trỏ phiên: trạng thái đang dở,
+quyết định đã ra và lý do, cạm bẫy đã gặp, việc kế tiếp) **thuộc về một skill
+riêng** — xem "Ranh giới với skill con trỏ phiên" bên dưới. Mục Trạng thái ở đây
+cố tình giữ mỏng để không trùng lặp với skill đó.
 
 ### Nguyên tắc cấm phân tích sớm
 
@@ -288,51 +323,120 @@ cho những phần chưa tới lượt. Lý do: làm xong phần 1 sẽ thay đ�
 phần 3 — phân tích sớm là phân tích sẽ bị vứt, và tệ hơn là phân tích cũ vẫn nằm
 đó trông như còn hiệu lực.
 
-Roadmap chỉ cần đủ chi tiết để trả lời: có bao nhiêu phần, ranh giới ở đâu, làm
+Roadmap chỉ cần đủ chi tiết để trả lời: có bao nhiêu phase, ranh giới ở đâu, làm
 theo thứ tự nào.
 
-### Thứ tự các phần
+### Ranh giới phase
+
+Ba ràng buộc, xét theo đúng thứ tự này khi chúng xung đột:
+
+1. **Vừa một phiên** (trần cứng). Nếu ước lượng không xong trong một phiên thì cắt
+   tiếp, kể cả khi về mặt nghiệp vụ nó là một khối liền. Cắt sai chỗ còn sửa
+   được; làm tràn phiên thì mất chất lượng ở nửa sau mà không ai thấy.
+2. **Gom việc gần nhau vào cùng phase**, lấp đầy phiên tới sát trần. Xem tiêu chí
+   bên dưới.
+3. **Kết thúc ở trạng thái bàn giao được**: code chạy, test qua, đã commit, không
+   để lại thứ dở dang mà chỉ phiên hiện tại mới hiểu. Phiên sau bắt đầu từ context
+   trống vẫn tiếp được.
+
+Nếu (1) và (3) xung đột — cắt cho vừa phiên thì phải để lại trạng thái dở — thì
+ranh giới đang sai chỗ; tìm chỗ cắt khác, thường là cắt theo **tầng dọc**: một
+luồng mỏng chạy được từ đầu tới cuối, thay vì làm xong toàn bộ một tầng ngang.
+
+### Gom việc gần nhau
+
+Trong trần một phiên, gom tối đa những việc **dùng chung bối cảnh**, vì chi phí
+lớn nhất của một phiên là nạp hiểu biết chứ không phải gõ code. Nạp một lần rồi
+làm hết những gì cần bối cảnh đó, thay vì nạp lại ba lần ở ba phiên.
+
+Dấu hiệu "gần nhau", mạnh dần:
+- Chạm cùng một module/vùng code.
+- Xoay quanh cùng một mô hình dữ liệu hoặc khái niệm nghiệp vụ.
+- Lặp lại cùng một khuôn (4 màn hình cùng dạng, 5 endpoint cùng kiểu) — làm liền
+  mạch nhanh hơn hẳn rải ra, vì khuôn đã nằm sẵn trong đầu.
+- Cùng phụ thuộc vào một quyết định thiết kế vừa ra.
+
+Ngược lại, **tách** những việc chạm vùng hoàn toàn khác nhau dù mỗi việc rất nhỏ:
+nhét chúng chung một phase buộc phải giữ hai bối cảnh rời rạc cùng lúc — đúng cái
+làm phiên xuống cấp.
+
+Khi (1) và (2) xung đột (nhóm việc gần nhau lớn hơn một phiên): cắt nhóm đó theo
+tầng dọc, giữ các phần cắt ra **liền kề nhau trong thứ tự thực thi** để bối cảnh
+còn nóng khi sang phase kế.
+
+### Khi phase đang làm bị tràn phiên
+
+Phát hiện giữa chừng rằng phase hiện tại lớn hơn ước lượng: **dừng ở mốc bàn giao
+được gần nhất**, commit, tách phần còn lại thành phase mới trong roadmap, cập nhật
+mục Trạng thái, rồi mới đi tiếp. Không cố làm nốt trong một phiên đã cạn context —
+đó chính là tình trạng thiết kế này muốn tránh.
+
+### Thứ tự các phase
 
 Ưu tiên theo thứ tự này khi xếp:
-1. Phần gỡ bất định lớn nhất (chưa chắc làm được, hoặc chưa rõ cách làm).
-2. Phần mà các phần khác phụ thuộc vào.
-3. Phần giao được giá trị sớm nhất cho người dùng.
+1. Phase gỡ bất định lớn nhất (chưa chắc làm được, hoặc chưa rõ cách làm).
+2. Phase mà các phase khác phụ thuộc vào.
+3. Phase giao được giá trị sớm nhất cho người dùng.
 
 ### Vòng lặp thực thi
 
 ```
-concept-briefing (bước 0: hồ sơ) → bước 1: đo bậc, phát hiện ≥3 phần
-  → brainstorming ở mức ranh giới (chỉ tới mức chia phần, không đi sâu)
+concept-briefing (bước 0: hồ sơ) → bước 1: đo bậc + kiểm tra ngưỡng chia phase
+  → brainstorming ở mức ranh giới (chỉ tới mức chia phase, không đi sâu)
   → roadmap.md → CHỐT VỚI USER
-  → với mỗi phần, theo thứ tự:
-       đo bậc riêng cho phần đó (có thể chỉ là T1 → bỏ spec/plan)
-       → spec/plan theo bậc của phần
+  → với mỗi phase, theo thứ tự — MỖI PHASE MỘT PHIÊN:
+       đọc mục Trạng thái của roadmap để nạp lại bối cảnh
+       → đo bậc riêng cho phase đó (có thể chỉ là T1 → bỏ spec/plan)
+       → spec/plan theo bậc của phase
        → executor → checkpoint-verification → convention-commit-gate
-       → cập nhật roadmap: điều học được, phạm vi/thứ tự phần sau nếu đổi
-  → adversarial-review-to-go (một lần, ở cuối, hoặc sau mỗi phần rủi ro cao)
+       → cập nhật mục Trạng thái + điều học được ảnh hưởng phase sau
+  → adversarial-review-to-go (một lần ở cuối, hoặc sau mỗi phase rủi ro cao)
   → finishing-a-development-branch
 ```
 
-Điểm mấu chốt: **mỗi phần được đo bậc lại độc lập.** Một chương trình lớn hoàn
-toàn có thể gồm phần lớn là các phần T1 — và khi đó chúng đi đường tắt của T1,
-không ai bắt viết spec cho từng phần.
+Hai điểm mấu chốt:
+
+- **Mỗi phase một phiên.** Đây là lý do tồn tại của việc chia phase. Phiên mới bắt
+  đầu bằng việc đọc mục Trạng thái, không phải bằng việc dò lại toàn bộ lịch sử.
+- **Mỗi phase được đo bậc lại độc lập.** Một chương trình lớn hoàn toàn có thể
+  gồm phần lớn là các phase T1 — khi đó chúng đi đường tắt của T1, không ai bắt
+  viết spec cho từng phase.
 
 ### Chốt roadmap với user
 
-Roadmap phải được người dùng chốt trước khi bắt đầu phần 1, vì nó quyết định thứ
+Roadmap phải được người dùng chốt trước khi bắt đầu phase 1, vì nó quyết định thứ
 tự giao hàng — thứ Claude không được tự quyết. Nhẹ hơn gate hồ sơ: chỉ cần xác
-nhận danh sách phần và thứ tự, không rà từng dòng.
+nhận danh sách phase và thứ tự, không rà từng dòng.
 
 Hồ sơ hệ thống phải có trước roadmap: mọi việc có roadmap đều là T2+, nên gate
 cứng đã áp dụng sẵn.
 
+### Ranh giới với skill con trỏ phiên
+
+Chia phase tạo ra nhu cầu chuyển tiếp giữa các phiên, nhưng **cơ chế con trỏ là
+một skill riêng, không nằm trong spec này**. Ranh giới:
+
+- **Spec này (`concept-briefing`)**: quyết định *có bao nhiêu phase, cắt ở đâu,
+  thứ tự nào* — và giữ trong roadmap một mục Trạng thái mỏng, đủ để biết đang ở
+  phase nào.
+- **Skill con trỏ (spec riêng)**: quyết định *làm sao một phiên mới nạp lại được
+  bối cảnh* — dựng và cập nhật con trỏ, ghi những gì phiên trước học được, quyết
+  định đã ra và lý do, cạm bẫy đã gặp, việc kế tiếp cụ thể.
+
+Lý do tách: con trỏ phiên hữu ích cả khi không có roadmap (một phiên dài bất kỳ
+cũng cần bàn giao), nên gắn cứng nó vào `concept-briefing` sẽ đặt sai chỗ. Khi
+skill con trỏ có mặt, roadmap chỉ cần trỏ tới nó thay vì tự chứa trạng thái.
+
 ### Quan hệ với `superpowers:brainstorming`
 
-`brainstorming` vốn đã có bước "nếu quá lớn thì tách sub-project". Phần này biến
-bước đó thành artifact có thật và gắn nó vào phép đo, thay vì để nó là một dòng
-khuyến nghị dễ bị bỏ qua. Khi roadmap được kích hoạt, `brainstorming` chạy **hai
-lần ở hai độ sâu**: một lần ở mức ranh giới để chia phần, rồi một lần đầy đủ cho
-từng phần khi tới lượt (nếu bậc của phần đó yêu cầu).
+`brainstorming` vốn đã có bước "nếu quá lớn thì tách sub-project", nhưng tiêu chí
+của nó là *nhiều subsystem độc lập* — tiêu chí về nghiệp vụ, không phải về sức
+chứa của một phiên. Phần này bổ sung trục thiếu đó, biến bước tách thành artifact
+có thật, và gắn nó vào phép đo thay vì để là một dòng khuyến nghị dễ bị bỏ qua.
+
+Khi roadmap được kích hoạt, `brainstorming` chạy **hai lần ở hai độ sâu**: một
+lần ở mức ranh giới để chia phase, rồi một lần đầy đủ cho từng phase khi tới lượt
+(nếu bậc của phase đó yêu cầu).
 
 ## Tác động xuống hạ nguồn
 
@@ -379,13 +483,19 @@ từng phần khi tới lượt (nếu bậc của phần đó yêu cầu).
   hướng (T2+), hoặc được gợi ý không chặn ở T1.
 - **Việc T1 nhưng người dùng muốn có spec**: người dùng luôn thắng phép đo. Cổng
   xác nhận tồn tại chính vì thế — Claude đề xuất bậc, người dùng có thể nâng.
-- **Làm phần 1 xong thì phần 3 hết cần thiết**: xoá phần đó khỏi roadmap và nói
-  lý do. Roadmap là kế hoạch sống, không phải cam kết phải làm đủ.
-- **Giữa chừng lộ ra phần mới**: thêm vào roadmap, xếp lại thứ tự theo đúng ba
+- **Làm phase 1 xong thì phase 3 hết cần thiết**: xoá khỏi roadmap và nói lý do.
+  Roadmap là kế hoạch sống, không phải cam kết phải làm đủ.
+- **Giữa chừng lộ ra phase mới**: thêm vào roadmap, xếp lại thứ tự theo đúng ba
   tiêu chí ưu tiên, báo người dùng một dòng.
 - **Tưởng là 3 phần độc lập nhưng thực ra dính chặt nhau**: không dựng roadmap
-  giả. Nếu không cắt được ranh giới sạch thì đó là một phần duy nhất — xử lý như
-  T2/T3 thường, và nói rõ vì sao không chia được.
+  giả. Nếu không cắt được ranh giới sạch mà khối lượng vẫn tràn phiên, cắt theo
+  tầng dọc (một luồng mỏng chạy được từ đầu tới cuối) thay vì theo tầng ngang.
+- **Phase quá nhỏ**: nếu roadmap sinh ra 8 phase mà mỗi phase chỉ vài chục dòng
+  thì đang chia vụn. Gộp lại cho tới khi mỗi phase lấp được phần lớn một phiên —
+  chi phí chuyển phiên (nạp lại bối cảnh, cập nhật trạng thái) là có thật.
+- **Phiên đứt giữa phase**: mục Trạng thái trong roadmap là thứ duy nhất phiên sau
+  cần đọc. Nếu nó không đủ để nối tiếp thì nó đang được cập nhật quá sơ sài — sửa
+  ngay, đừng chờ tới lúc cần.
 - **Nhiều hệ thống trong một repo (monorepo)**: một `system-profile.md` cho mỗi
   đơn vị triển khai độc lập, đặt cạnh đơn vị đó; nếu cả monorepo triển khai chung
   thì một file ở gốc.
