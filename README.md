@@ -57,7 +57,7 @@ Remove with `codex plugin remove conductor` and
 
 - **No superpowers.** `brainstorming`, `writing-plans`, and
   `finishing-a-development-branch` are Claude Code plugins. On Codex, do those
-  steps directly; the eight delta skills work standalone.
+  steps directly; the nine delta skills work standalone.
 - **No harness-tracked background jobs.** `orchestrating-executors` requires a
   monitor on every dispatch — run it as a shell background job polling the BASE
   commit, or say plainly that there is no monitor and poll next turn.
@@ -80,7 +80,8 @@ skill's `validate_plugin.py`.
 | `orchestrating-executors` | Workforce management: who is on the team and what they proved, subagent-vs-external choice, quota, one-task handoffs, a monitor on every dispatch, parallel isolation, checkpoint protocol. |
 | `executor-context` | One fixed context file the coordinator maintains, so handoffs point at it instead of retyping conventions. |
 | `checkpoint-verification` | Refuses green tests as proof; inspect call-site + drive the real runtime path. |
-| `adversarial-review-to-go` | External adversarial reviewer in converging rounds to GO; re-verify every finding. |
+| `planning-for-delegation` | The gate a plan passes before the first dispatch: spec/plan altitude, the project's plan-detail convention (asked once, kept in the profile), nine structural checks, [E]/[C], phase gates. |
+| `adversarial-review-to-go` | External adversarial reviewer locked to the altitude of what it reviews — spec, plan or diff; converging rounds to GO on a diff, one round on a document; re-verify every finding. |
 | `convention-commit-gate` | Centralized enums, no magic literals, project commit style. |
 
 ## The Arc
@@ -91,6 +92,7 @@ which steps run. Below is the full T2/T3 path:
 ```
 pointer-handoff (resume) → lessons-ledger (what applies here?)
   → concept-briefing → brainstorming (SP) → writing-plans (SP)
+  → planning-for-delegation (gate the plan before anyone is dispatched)
   → orchestrating-executors ⇄ checkpoint-verification ⇄ convention-commit-gate  (per task)
   → adversarial-review-to-go
   → finishing-a-development-branch (SP)
@@ -101,7 +103,7 @@ pointer-handoff (resume) → lessons-ledger (what applies here?)
 |------|-----------|
 | **T0** mechanical (typo, constant, rename) | Do it directly → `convention-commit-gate` |
 | **T1** one obvious way, 1–3 files | No spec, no plan file → executor → verification gates |
-| **T2** ≥2 approaches, or touches schema/API | Full arc; adversarial review only for risky areas |
+| **T2** ≥2 approaches, or touches schema/API | Full arc, incl. the plan gate; adversarial review only for risky areas |
 | **T3** money/settled figures, broken boundaries | Full arc, nothing skipped |
 
 Skipping steps is always the user's call — asked once, batched. Verification gates
@@ -119,5 +121,5 @@ file for your machine/agents; the skills stay unchanged.
 ## Relationship to superpowers
 
 On Claude Code, Conductor is a delta: it assumes superpowers is installed for the
-brainstorm / plan / finish bookends. The eight delta skills also work standalone,
+brainstorm / plan / finish bookends. The nine delta skills also work standalone,
 which is how they run on Codex.

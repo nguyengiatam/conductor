@@ -9,7 +9,9 @@ Conductor is the delivery discipline for work where **Claude architects and
 reviews while external coding agents implement.** It is a thin delta over
 superpowers — it does not replace `brainstorming`, `writing-plans`, or
 `finishing-a-development-branch`; it slots the delegation-and-review loop
-between them.
+between them. The one place it overrides superpowers is how detailed a plan
+is, and even there the project decides, not the plugin — see
+`planning-for-delegation`.
 
 ## The Arc
 
@@ -21,7 +23,9 @@ pointer-handoff                  → (ongoing project) read the pointer, reconci
 lessons-ledger                   → pull only the lessons matching this area + kind of work
 concept-briefing                 → confirm system profile, tier the request, route
 [superpowers:brainstorming]      → design the change (steered by the profile)
-[superpowers:writing-plans]      → task-by-task plan with real code
+[superpowers:writing-plans]      → draft the task-by-task plan
+planning-for-delegation          → gate it: altitude, plan-detail convention,
+                                   nine structural checks, [E]/[C], phase gates
 
    ┌─ executor-context           → keep the fixed context file current; handoffs point at it
    ├─ orchestrating-executors    → check quota, hand off ONE task, attach a monitor at dispatch
@@ -55,7 +59,7 @@ with its own tier. Detailed plans are written per phase, never in advance.
 |------|------|
 | **T0** mechanical | Do it yourself → `convention-commit-gate`. Nothing else. |
 | **T1** small, obvious | No spec, no plan file → executor → `checkpoint-verification` → `convention-commit-gate` |
-| **T2** medium | Full arc; `adversarial-review-to-go` only if it touches a risky area |
+| **T2** medium | Full arc, incl. `planning-for-delegation`; `adversarial-review-to-go` only if it touches a risky area |
 | **T3** large / critical | Full arc, nothing skipped |
 
 Skipping a step at T0/T1 requires the user's OK — `concept-briefing` asks once,
@@ -71,11 +75,12 @@ batched. Verification gates are never skipped when real code gets written.
 | Planning large work as phases from foundation upward | `concept-briefing` (roadmap) |
 | Deciding what to build | `superpowers:brainstorming` |
 | Turning a spec into tasks | `superpowers:writing-plans` |
+| Checking a plan before anyone is dispatched | `planning-for-delegation` |
 | Handing a task to an external agent | `orchestrating-executors` |
 | Writing project context executors reuse every dispatch | `executor-context` |
 | Accepting an executor's result | `checkpoint-verification` |
 | Committing at a checkpoint | `convention-commit-gate` |
-| Hardening a risky area before merge | `adversarial-review-to-go` |
+| Reviewing a spec, a plan, or a diff adversarially | `adversarial-review-to-go` |
 | Integrating the finished branch | `superpowers:finishing-a-development-branch` |
 
 ## Principles That Hold Across All Stages
@@ -90,6 +95,11 @@ batched. Verification gates are never skipped when real code gets written.
   delegation.)
 - Every finding from any reviewer is re-verified on real source before it is
   applied — never blindly.
+- Reviewers are locked to the altitude of what they review, and only a finite
+  surface (a diff) can be converged to zero. On a document, one round, then stop.
+- Anything about the future — growth, expected load — is asked, never inferred.
+  The repo holds no evidence about it, so a guess there is a guess that hardens
+  into a fact.
 - Green tests are never acceptance; the call-site and real runtime path are.
 - Whoever writes the code does not certify it. Recompute expected values yourself.
 - Every dispatch gets a monitor attached at dispatch — and a monitor you describe
@@ -104,7 +114,7 @@ and Codex both do). Two things differ by harness — neither changes the discipl
 
 - **Bookend skills.** `brainstorming`, `writing-plans`, and
   `finishing-a-development-branch` ship with superpowers on Claude Code. Elsewhere,
-  do those steps directly; the eight delta skills work standalone.
+  do those steps directly; the nine delta skills work standalone.
 - **Background work.** `orchestrating-executors` requires a monitor on every
   dispatch. Where the harness tracks background jobs, use that; where it doesn't,
   run the dispatch as a shell background job and poll against the BASE commit. If
