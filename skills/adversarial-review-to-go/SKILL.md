@@ -1,20 +1,118 @@
 ---
 name: adversarial-review-to-go
-description: Use after a risky area is implemented and before merge — runs an external adversarial reviewer in converging rounds until findings reach zero (GO), while independently re-verifying every finding on real source before acting.
+description: Use when a spec, a plan, or an implemented diff needs an external adversarial reviewer — locks the reviewer to the altitude of what is being reviewed, converges diff findings to zero (GO), stops document review after one round, and re-verifies every finding on real source before acting.
 ---
 
 # Adversarial Review to GO
 
 For design-sensitive or concurrency-sensitive work, one review pass is not
 enough. Run an external adversarial reviewer (the reviewer-strong agent in the
-roster) in **converging rounds**: each round produces findings, you patch the
-valid ones minimally, re-verify, and re-review — until a round produces zero
-surviving findings ("GO"). Convergence looks like 5 → 2 → 1 → 0.
+roster), re-verify each finding yourself, patch the valid ones minimally, and —
+**on a finite surface** — review again until a round produces zero surviving
+findings ("GO").
+
+Two things decide whether that loop is right: **what surface you are reviewing**
+(below) and **what altitude the reviewer is locked to**
+([references/review-prompts.md](references/review-prompts.md)). Get either wrong
+and the rounds stop converging.
 
 This is the delegated-reviewer counterpart to
 `superpowers:receiving-code-review` — apply that skill's discipline (act on
 valid feedback, push back with reasoning on invalid feedback) to an external
 agent's output.
+
+## Where the Loop Applies
+
+Converging to zero assumes the surface being reviewed is **finite**. A diff is:
+patching it changes bounded code. A document is not: every patch writes new
+prose, and new prose is new surface to attack. Run the wrong loop on a document
+and you get growth, not convergence.
+
+| Surface | Rounds | Why |
+|---------|--------|-----|
+| **Diff / implemented code** | loop until zero → GO | Finite surface. The last round is where subtle findings surface. |
+| **Spec** | **one round, then stop** | Each patch adds prose that invites the next finding. |
+| **Plan** | **one round, then stop** | Same. Re-review only after the plan is restructured, not after wording fixes. |
+
+Measured on a real document review: two rounds went **10 → 11** findings and the
+document grew **300 → 720 lines**. That is not a slow convergence, it is a
+different shape of curve.
+
+## The Stop Rule
+
+**If findings do not decrease across two consecutive rounds, stop. Do not run
+another round.** A non-decreasing count is evidence about the *process*, not
+about the artifact. Check, in this order:
+
+1. **Altitude** — is the reviewer being invited to find things that belong one
+   layer down? (Reviewing a spec with a source-file list attached is the
+   classic.) Fix the prompt, not the artifact.
+2. **Surface** — is this a document being run through the diff loop?
+3. **Patch-induced findings** — see below.
+
+Only after one of those is fixed does another round mean anything.
+
+## Lock the Reviewer to the Altitude
+
+Calibration has **two axes**, and the skill used to name only one.
+
+**Severity** comes from `concept-briefing`'s `system-profile.md` — include it in
+every review prompt: the trade-off priority order, the hard boundaries, the real
+scale. Without it a reviewer applies generic best practice and you get noise in
+both directions: scaling findings on a 200-user internal tool, or a shrug at a
+boundary that must never break. A finding is only real relative to this system's
+priorities. The profile does **not** soften the bar on what it names untouchable
+— those are the findings to take most seriously.
+
+**Altitude** comes from *what is being reviewed*, and it is what the prompt must
+constrain. Three templates, one per artifact type, in
+[references/review-prompts.md](references/review-prompts.md):
+
+| Reviewing | Ask about | Forbid |
+|-----------|-----------|--------|
+| **Spec** | decisions, missing constraints, DoD that can go green for the wrong reason | source-file lists, "check it against the code", mechanism |
+| **Plan** | can each task actually run, are the dependencies real, does acceptance measure the *hardest* requirement | debating mechanism, rewriting the design |
+| **Diff** | correctness at the cited site, gaps tests don't cover, seeded mutations | — file lists belong here |
+
+Do not reach for one generic prompt and adjust it by feel. The controlled
+comparison is stark: same model, same document, prompt switched to lock altitude
+⇒ implementation-layer findings dropped to **0** (previously the majority) and
+**3/10** findings were "cut this, it belongs in the plan".
+
+## Patches Breed Findings
+
+**Round N+1 reviews the round-N patches first.** Say so in the prompt, and name
+the patched sites.
+
+In the measured document review, **6 of 11** round-2 findings were caused by the
+round-1 patch itself. A reviewer that treats round N+1 as a fresh sweep spends
+its attention on the parts nobody touched, and the newest, least-reviewed text
+gets the least scrutiny — exactly backwards.
+
+## Ask for the Reverse Altitude Check
+
+Alongside "what is missing", ask the reviewer for **what is present that belongs
+one layer down and should be cut**. Reviewers volunteer additions by default;
+subtraction has to be requested.
+
+This is what keeps a spec from drifting into plan territory over successive
+rounds, and it is directly measurable: 3 of 10 findings in the calibrated round
+were cuts. A document that only ever grows under review has been told, by
+omission, that growth is the only allowed outcome.
+
+## Seed Mutations (Diff Reviews)
+
+Green tests prove the code runs. They do not prove the tests are watching the
+right thing. Require the reviewer to:
+
+1. Copy the repo to a scratch directory.
+2. For **each constraint the task claims to satisfy**, seed a deliberate defect —
+   preferring the failure modes the handoff itself called classic.
+3. Run the suite and report **which mutations were not caught**.
+
+At a real gate this caught 4/4 seeded mutations, including the exact trap the
+handoff had flagged. Without it, a green suite of hundreds of tests is evidence
+of very little.
 
 ## The Golden Rule
 
@@ -31,46 +129,51 @@ wrong about severity. For each finding:
 4. Surface rejected findings to the user for a decision when they involve a
    real trade-off (e.g. distributed primitive vs in-process guard).
 
-## Calibrate the Reviewer
+This one is not a theory: across a full delivery, 21 of 21 findings survived
+independent re-verification and none were rejected — which is exactly why the
+rule is cheap to keep and expensive to skip the one time it matters.
 
-Include `concept-briefing`'s `system-profile.md` in the review prompt — the
-trade-off priority order, the hard boundaries, the real scale. Without it a
-reviewer applies generic best practice and you get noise in both directions:
-scaling findings on a 200-user internal tool, or a shrug at a boundary that must
-never break. A finding is only real relative to this system's priorities.
-
-The profile does not soften the bar on what it names untouchable. Those are the
-findings to take most seriously.
-
-## The Round Loop
+## The Round Loop (diff)
 
 ```
 round = 1
 repeat:
-    dispatch external reviewer on the current diff (self-contained prompt:
-        point at plan + diff scope; fresh thread if prior context is huge)
+    dispatch external reviewer on the current diff
+        (self-contained prompt: plan pointer + diff scope + system-profile;
+         round > 1: name the previous round's patched sites, review them first;
+         require seeded mutations for every claimed constraint)
     for each finding: re-verify on source → patch-if-valid / rebut-if-not
     re-run checkpoint-verification (2 consecutive green where applicable)
+    if findings did not decrease over the last two rounds: STOP, check altitude
     round += 1
 until a round yields zero surviving findings  → GO
 ```
 
+For a spec or a plan: dispatch once, re-verify, patch, **stop**. Re-review only
+if the artifact was restructured, not because wording changed.
+
 ## Practical Notes
 
-- Keep each review prompt self-contained (plan pointer + diff scope) so a fresh
+- Keep each review prompt self-contained (pointer + scope + profile) so a fresh
   reviewer thread works — don't rely on a giant resumed context.
 - The reviewer may run out of quota mid-loop. A purely formal confirmation round
   can be skipped if the user agrees; already-verified mechanical fixes don't
   need another round.
 - Record the convergence (e.g. "4 rounds, 5→2→1→0") and the accepted residual
-  trade-offs in the merge commit or plan notes.
+  trade-offs in the merge commit or plan notes. Record a non-convergence too,
+  with what the altitude check found — that is a `lessons-ledger` entry.
 
 ## Red Flags
 
 | Thought | Reality |
 |---------|---------|
 | "Reviewer flagged it, just apply it" | Re-verify on source first. Reviewers are sometimes wrong. |
-| "One round was clean enough" | Converge to zero. The last round is where subtle ones surface. |
+| "One round was clean enough" | On a diff, converge to zero. The last round is where subtle ones surface. |
+| "Findings went up — run another round" | Findings went up because the surface grew or the altitude is wrong. Another round makes it worse. |
+| "I'll give the reviewer the file list so it can check properly" | On a spec or plan that is the bug. It invites implementation-layer findings you then patch into the document. |
+| "The reviewer will figure out what layer to work at" | It will not. It answers the prompt you wrote; a file list is an instruction. |
+| "Round 2 should look at everything again" | Round 2 looks at round 1's patches first. That is where the new defects are. |
+| "149 tests pass, the constraint holds" | Tests prove it runs. Seed a mutation to prove they are watching. |
 | "Rewrite the whole thing to be safe" | Patch minimally at the contention point. Broad rewrites add risk. |
 | "Rejecting this finding, moving on" | If it's a real trade-off, the user decides — surface it. |
 | "Reviewer wants it hardened for scale" | Check the profile. On a one-replica internal tool that's noise; on the boundary it calls untouchable it's the opposite. |
