@@ -1,6 +1,6 @@
 ---
 name: concept-briefing
-description: Use as the first step on any new request, before design begins — locks a user-confirmed system profile (scale, users, trade-off priorities) and tiers the request to route it to the right amount of process, so mechanical work skips spec/plan entirely and layered work gets a phased roadmap instead of one giant plan.
+description: Use as the first step on any new request, before design begins — locks a user-confirmed system profile (scale today and expected, users, trade-off priorities) and tiers the request to route it to the right amount of process, so mechanical work skips spec/plan entirely and layered work gets a phased roadmap instead of one giant plan.
 ---
 
 # Concept Briefing
@@ -29,8 +29,9 @@ one line about that line only. No contradiction → use it, ask nothing.
 
 **Missing** → draft it from the repo: `README`, `CLAUDE.md`, compose/k8s
 manifests, config files, migrations, CI config, package manifest, service count.
-Mark every inferred line `~`. Then ask the user **in one batched message**: the
-four mandatory lines below, plus any low-confidence draft lines. Write the file
+Mark every inferred line `~` — **except lines about the future, which are never
+inferred at all** (see below). Then ask the user **in one batched message**: the
+five mandatory lines below, plus any low-confidence draft lines. Write the file
 as `ĐÃ CHỐT`, commit.
 
 ### The gate
@@ -49,9 +50,28 @@ At T2+, `concept-briefing` does not finish and **design does not start choosing
 approaches** while the profile is `CHƯA CHỐT`. (On Claude Code the design step is
 `superpowers:brainstorming`; elsewhere it's whatever you design with.)
 
-**Four lines the user must answer directly** — never fill these in and call it
-done: real user count, scaling need, trade-off priority order, and what must
-never be traded away. Everything else you draft and they confirm in a batch.
+**Five lines the user must answer directly** — never fill these in and call it
+done: real user count today, **expected scale plus the horizon it applies to**,
+scaling need, trade-off priority order, and what must never be traded away.
+Everything else you draft and they confirm in a batch.
+
+**The repo contains no future.** Every line about what the system will become —
+growth, expected load, planned users — must be answered by the user. It may never
+carry `~`, because a `~` there is not an inference from evidence, it is a guess
+that freezes into "fact" and then propagates into every downstream prompt. That
+is precisely what the `~`/`✓` markers exist to prevent. If the user cannot say
+yet, the line is `CHƯA CHỐT` — an honest gap that stops an architecture decision
+is cheaper than a confident invention that steers one.
+
+Alongside it, the profile records **which horizon the system is being designed
+for** — today's numbers or the expected ones. That choice is currently invisible,
+so each session picks differently and the answers disagree without anyone
+noticing.
+
+One profile section is filled **later, not now**: *Quy ước lập kế hoạch* — how
+detailed this project's plans are. `planning-for-delegation` asks it the first
+time a plan is written and records the answer there. Don't ask it upfront; it
+costs a round-trip on projects that never reach a plan file.
 
 **Silence is not consent.** There is no "the user didn't object, so it's
 confirmed" path. If they can't decide a line, mark that line `CHƯA CHỐT`, don't

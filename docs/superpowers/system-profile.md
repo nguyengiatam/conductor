@@ -1,6 +1,6 @@
 # System Profile: Conductor (Claude Code plugin)
 
-**Cập nhật:** 2026-08-05
+**Cập nhật:** 2026-09-03
 **Trạng thái:** ĐÃ CHỐT — user xác nhận 2026-08-05
 **Ký hiệu:** `~` = Claude suy từ repo, chưa ai xác nhận · `✓` = user đã chốt
 
@@ -11,9 +11,19 @@
   hành thật; lệnh theo máy chỉ nằm trong `executor-roster.md`.
 - Tải: ~ không có runtime. "Tải" duy nhất là **context Claude phải nạp** mỗi lần
   skill kích hoạt — đó mới là tài nguyên khan hiếm ở đây.
-- Tăng trưởng 12 tháng tới: ~ số skill tăng dần; mỗi skill thêm vào là thêm chi
-  phí nạp cho mọi phiên.
-- **Scale:** ✓ không áp dụng — plugin là file markdown, không có gì để scale.
+- **Scale hiện tại:** ✓ không áp dụng — plugin là file markdown, không có gì để
+  scale.
+
+## Quy mô DỰ KIẾN (user trả lời — không suy từ repo, không mang dấu `~`)
+- **Mốc thời gian:** CHƯA CHỐT
+- **Số skill dự kiến tại mốc đó:** CHƯA CHỐT — đây là con số quyết định thật:
+  mỗi skill thêm vào là thêm chi phí nạp context cho **mọi** phiên, nên trần số
+  skill là ràng buộc thiết kế, không phải chuyện tăng trưởng tự nhiên.
+- **Thiết kế cho mốc nào:** CHƯA CHỐT
+
+> Dòng "Tăng trưởng 12 tháng tới: ~ số skill tăng dần" trước đây mang dấu `~` —
+> tức Claude tự suy. Đúng loại lỗi mà luật mới cấm: repo không chứa tương lai.
+> Giữ `CHƯA CHỐT` cho tới khi user trả lời.
 
 ## Ưu tiên khi tradeoff
 **Xếp hạng, dùng khi hai yêu cầu xung đột (1 = cao nhất):**
@@ -72,3 +82,13 @@ luật không tồn tại.
     `writing-plans`, `finishing-a-development-branch` vẫn là của superpowers.
 - ~ Phụ thuộc ngoài: superpowers (bookend), các CLI executor (Codex, agy, …) chỉ
   qua roster.
+
+## Quy ước lập kế hoạch
+- **Độ chi tiết plan:** ✓ **plan trỏ, không chép** — user chốt 2026-09-03. Plan
+  nêu mục tiêu, ràng buộc, nghiệm thu; phần chữ để người viết skill nghĩ. Đây là
+  thay đổi **có chủ ý** so với tiền lệ duy nhất trong repo
+  (`docs/superpowers/plans/2026-07-24-concept-briefing.md`: 481 dòng, code viết
+  sẵn từng bước) — plan cũ không phải khuôn mẫu cho plan sau.
+- Ai thực thi phần lớn task: ~ coordinator viết thẳng; repo này là tài liệu, mỗi
+  file là một luật phải cân từng chữ.
+- Nơi đặt spec/plan: ✓ `docs/superpowers/specs/` và `docs/superpowers/plans/`.
