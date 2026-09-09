@@ -81,7 +81,7 @@ skill's `validate_plugin.py`.
 | `executor-context` | One fixed context file the coordinator maintains, so handoffs point at it instead of retyping conventions. |
 | `checkpoint-verification` | Refuses green tests as proof; inspect call-site + drive the real runtime path. |
 | `planning-for-delegation` | The gate a plan passes before the first dispatch: spec/plan altitude, the project's plan-detail convention (asked once, kept in the profile), nine structural checks, [E]/[C], phase gates. |
-| `adversarial-review-to-go` | External adversarial reviewer locked to the altitude of what it reviews — spec, plan or diff; converging rounds to GO on a diff, one round on a document; re-verify every finding. |
+| `adversarial-review-to-go` | External adversarial reviewer locked to the altitude of what it reviews — spec, plan or diff; every finding carries 1-2 fix directions (a direction, never a patch) at that altitude; converging rounds to GO on a diff, one round on a document; re-verify every finding. |
 | `convention-commit-gate` | Centralized enums, no magic literals, project commit style. |
 
 ## The Arc

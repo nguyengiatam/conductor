@@ -14,6 +14,33 @@ Every template includes `system-profile.md` (or its key lines). That axis sets
 
 ---
 
+## The Finding Format — Required by All Three
+
+Paste this block at the end of every prompt below. A finding without fix options
+hands the owner a blank page at the moment the reviewer's context is richest.
+
+> **Output format. Every finding has these fields, in this order:**
+>
+> - **Finding** — what is wrong, at the cited place.
+> - **Failure** — the concrete consequence. Not "risky": say what breaks.
+> - **Fix options** — 1 or 2 **directions**, not patches. Each names the approach
+>   and where it applies, *at the altitude of this review*, in at most two
+>   sentences, followed by its cost: what it breaks, what it slows, what it
+>   postpones. No code, no diff, no rewritten paragraph, no line numbers — the
+>   owner writes the change after confirming the finding. Give a second option
+>   only when it takes a **different approach**; the same fix at two sizes is one
+>   option.
+> - **Recommended** — which option you would take, and why. When the two are a
+>   real trade-off for the owner to settle, write "owner decides" and say what the
+>   decision turns on.
+>
+> These fixes are read as suggestions: the owner re-verifies every finding on the
+> real source before applying anything. Write the option you would defend, not the
+> one that is easiest to accept. Spending your budget drafting an implementation
+> is attention taken from finding the next defect.
+
+---
+
 ## 1 — Reviewing a SPEC
 
 **Attach:** the spec · `system-profile.md` · the original request.
@@ -37,6 +64,11 @@ Every template includes `system-profile.md` (or its key lines). That axis sets
 >
 > Out of scope, do not report: choice of data structure, file layout, function
 > or type names, library choice, line-level wording.
+>
+> <paste the finding format block>. At this altitude a fix option names which
+> decision to take instead, or what constraint the spec is missing — named in the
+> spec's own terms, not drafted for it. For a reverse-altitude finding, it says
+> what to cut and which layer it belongs to.
 
 **Why the prohibition.** Attaching files and saying "verify against the code"
 produced a review where the majority of findings were implementation-layer; the
@@ -77,6 +109,11 @@ executes each task (the [E]/[C] assignment) · the executor's known capability.
 >
 > Out of scope, do not report: naming, code style, wording, anything that would
 > only be visible after the code exists.
+>
+> <paste the finding format block>. At this altitude a fix option names which task
+> to split, which dependency to reorder, which "or" to pin down, or what the
+> acceptance should measure — the direction only. Do not rewrite the task, the
+> acceptance line, or the sequence for me.
 
 ---
 
@@ -108,6 +145,13 @@ executes each task (the [E]/[C] assignment) · the executor's known capability.
 > 4. **Profile check.** Which findings are you raising only because of generic
 >    best practice, and would not matter at this system's stated scale? List
 >    them separately — do not mix them with the rest.
+>
+> <paste the finding format block>. At this altitude a fix option names the site
+> and what kind of guard belongs there — smallest one that holds first; a guard or
+> CAS at the contention point ranks above a rewrite, and the cost line says so
+> when you propose the larger one. Where a fix needs a test to hold it, name what
+> the test must catch. Do not write the patch; I write it after confirming the
+> finding at the site.
 
 **Why mutations are mandatory here.** At a real gate, a reviewer did this
 unasked: 4 of 4 seeded mutations were caught, including the exact trap the

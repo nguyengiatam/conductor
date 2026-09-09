@@ -100,6 +100,60 @@ rounds, and it is directly measurable: 3 of 10 findings in the calibrated round
 were cuts. A document that only ever grows under review has been told, by
 omission, that growth is the only allowed outcome.
 
+## Every Finding Ships With Fix Options
+
+A finding with no fix is a bug report: it hands the owner a blank page at the
+exact moment the context is freshest in the reviewer's head. **Every finding
+carries 1-2 proposed fixes** — required output, not a courtesy.
+
+Each finding has these fields, in this order:
+
+| Field | Content |
+|-------|---------|
+| **Finding** | what is wrong, at the cited place |
+| **Failure** | the concrete consequence — inputs or interleaving → wrong result. Not "risky" |
+| **Fix options** | 1-2 directions. Each: the approach and where it applies, in at most two sentences, plus its cost — what it breaks, slows, or postpones |
+| **Recommended** | which option, and why — or "owner decides" plus what the decision turns on |
+
+A second option only when it takes a **different approach**. The same fix at two
+sizes is one option.
+
+**A fix option is a direction, not a patch.** Name the approach and the place it
+applies, then stop. Two sentences is the whole budget — no code, no diff, no
+rewritten paragraph, no line numbers. The detail belongs to whoever re-verifies
+the finding on real source, because only they can see what the surrounding code
+actually allows.
+
+| Right size | Too deep |
+|------------|----------|
+| "Guard the read-modify-write in `applyQuota` with a compare-and-swap on the version field — costs a retry loop." | the 30-line patch that implements the CAS |
+| "State the retention limit as a constraint in §3 instead of leaving it to the plan." | the rewritten §3, drafted for you |
+| "Split T4 — the migration and the backfill touch the same table and cannot run in parallel." | a re-sequenced task list with new IDs |
+
+A fix option that no longer fits in two sentences has stopped being a direction
+and become the implementation — which is the owner's work, and only after the
+finding is confirmed. An over-detailed option costs twice: the reviewer spends
+its attention drafting instead of finding, and the draft is persuasive enough to
+get applied without the check.
+
+**Fix options inherit the review's altitude**, exactly as findings do:
+
+| Reviewing | A fix option looks like |
+|-----------|-------------------------|
+| **Spec** | which decision to take instead, or what constraint the spec is missing — named, not drafted |
+| **Plan** | which task to split, which dependency to reorder, what the acceptance should measure |
+| **Diff** | where the guard belongs and what kind — the smallest one that holds, not the code for it |
+
+A spec review that answers with a patch has dropped an altitude — the same defect
+as attaching a source-file list to the prompt, arriving from the other end.
+
+**They are suggestions, and the Golden Rule still runs.** A proposed fix is the
+reviewer's hypothesis about a defect you have not confirmed yet. Confirm the
+finding on real source first, then decide whether either option is the right
+patch. A well-written fix option is the most persuasive thing in the report and
+the easiest to apply without looking — which is precisely why re-verification
+comes first.
+
 ## Seed Mutations (Diff Reviews)
 
 Green tests prove the code runs. They do not prove the tests are watching the
@@ -122,12 +176,17 @@ findings blindly.** The external reviewer is fast and catches things e2e can't
 wrong about severity. For each finding:
 
 1. Confirm it on the actual code (reproduce the reasoning at the cited site).
-2. If valid — patch minimally (prefer a CAS/guard at the exact contention point
-   over a broad rewrite), then re-verify with `checkpoint-verification`.
+2. If valid — weigh the reviewer's fix options against what the code actually
+   shows, then patch minimally (prefer a CAS/guard at the exact contention point
+   over a broad rewrite) and re-verify with `checkpoint-verification`. Taking an
+   option unchanged is fine once you have confirmed it at the site; taking it
+   because the reviewer wrote it well is the failure.
 3. If invalid or overstated — push back with the code/test that disproves it,
    and record why it was rejected.
 4. Surface rejected findings to the user for a decision when they involve a
-   real trade-off (e.g. distributed primitive vs in-process guard).
+   real trade-off (e.g. distributed primitive vs in-process guard). Same for any
+   finding the reviewer marked "owner decides" — pass both options up as written,
+   with their costs, rather than picking one quietly.
 
 This one is not a theory: across a full delivery, 21 of 21 findings survived
 independent re-verification and none were rejected — which is exactly why the
@@ -141,8 +200,10 @@ repeat:
     dispatch external reviewer on the current diff
         (self-contained prompt: plan pointer + diff scope + system-profile;
          round > 1: name the previous round's patched sites, review them first;
-         require seeded mutations for every claimed constraint)
-    for each finding: re-verify on source → patch-if-valid / rebut-if-not
+         require seeded mutations for every claimed constraint;
+         require the finding format: finding + failure + 1-2 fix options + recommendation)
+    for each finding: re-verify on source → choose among the fix options
+                      → patch-if-valid / rebut-if-not
     re-run checkpoint-verification (2 consecutive green where applicable)
     if findings did not decrease over the last two rounds: STOP, check altitude
     round += 1
@@ -176,4 +237,10 @@ if the artifact was restructured, not because wording changed.
 | "149 tests pass, the constraint holds" | Tests prove it runs. Seed a mutation to prove they are watching. |
 | "Rewrite the whole thing to be safe" | Patch minimally at the contention point. Broad rewrites add risk. |
 | "Rejecting this finding, moving on" | If it's a real trade-off, the user decides — surface it. |
+| "The reviewer wrote a fix, apply it" | The fix rests on a finding you have not confirmed. Verify at the site, then choose. |
+| "Findings only — proposing the fix is my job" | Then every finding starts from a blank page. 1-2 options are required output; the choice is still yours. |
+| "Ask for three or four options to compare" | Two different approaches, max. A menu shifts the thinking back onto you and dilutes the reviewer's reasoning. |
+| "Handy patch for my spec finding" | Spec fixes are decisions and constraints. A patch means the reviewer dropped an altitude — reject it like a file-list finding. |
+| "It shipped working code, that saves me a step" | Code written against source the reviewer only partly saw. Take the direction, write the change yourself after confirming the finding. |
+| "More detail in the option means less work for me" | It means the reviewer spent its attention drafting instead of finding, and the draft is persuasive enough to get applied unchecked. |
 | "Reviewer wants it hardened for scale" | Check the profile. On a one-replica internal tool that's noise; on the boundary it calls untouchable it's the opposite. |
